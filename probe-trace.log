@@ -367,3 +367,87 @@ curl: (6) Could not resolve host: search-backend.rutube.ru
 + get 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=0'
 + curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=0'
 + jq -c '{n:(.results|length),next,keys:(.results[3]|keys),first:(.results[3]|{title:(.title|.[0:20]),is_livestream,id})}'
++ OUT=probe-results.md
+++ date -u
++ echo '# probe6 Sat Nov 21 08:18:27 UTC 2026'
++ UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
++ P=https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist
++ q=%D0%BA%D0%BE%D1%82
++ echo -e '\n## filter enums'
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' created=day
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=day' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=day' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' created=week
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=week' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=week' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' created=month
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=month' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=month' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' created=year
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=year' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=year' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' duration=short
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=short' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=short' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' duration=medium
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=medium' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=medium' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' duration=long
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=long' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=long' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' duration=movie
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=movie' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&duration=movie' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'
++ printf '\n- %s: ' 'created=month&duration=medium'
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=month&duration=medium' -o /tmp/f.json -w '%{http_code} '
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&created=month&duration=medium' -o /tmp/f.json -w '%{http_code} '
++ jq -c '.results|length' /tmp/f.json
++ echo -e '\n## VOD options structure'
++ VOD=4ceb9757e7eec396856b7c7b08b7565a
++ get 'https://rutube.ru/api/play/options/4ceb9757e7eec396856b7c7b08b7565a/?format=json' -o /tmp/vod.json
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/play/options/4ceb9757e7eec396856b7c7b08b7565a/?format=json' -o /tmp/vod.json
++ jq -c '{keys:keys, balancer:.video_balancer, live_streams:(.live_streams|tostring|.[0:200]), captions:(.captions|length)}' /tmp/vod.json
+++ jq -r '.video_balancer.m3u8 // .video_balancer.default // empty' /tmp/vod.json
++ m3u8='https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https'
++ printf 'm3u8=%s\n' 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https'
++ '[' -n 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https' ']'
++ echo '- plain fetch:'
++ get 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https' -o /tmp/m.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https' -o /tmp/m.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n'
++ head -6 /tmp/m.m3u8
++ echo '- referer fetch:'
++ get 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https' -H 'Referer: https://rutube.ru/' -o /tmp/m2.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://bl.rutube.ru/route/4ceb9757e7eec396856b7c7b08b7565a.m3u8?guids=569f3818-02c5-483d-a8cf-aff5db869aea_1920x1080_2659458_D2659009_B2460765A192000_F25A44100_avc1.640029_mp4a.40.2,909bde5e-7201-441b-8458-792b1b14d518_1280x720_1646773_D2659009_B1448077A192000_F25A44100_avc1.640029_mp4a.40.2,92bb57dd-83dc-49ed-abd8-8b7a691a14b3_848x480_1055546_D2659009_B920847A128001_F25A44100_avc1.4d401f_mp4a.40.2,a3b812c7-1cda-4441-9330-b10ee43ea03c_640x360_1042379_D2659009_B973250A64002_F25A44100_avc1.42c01f_mp4a.40.2,2b63abce-b342-4998-a522-827cce00011c_424x240_678159_D2659009_B609028A64002_F25A44100_avc1.42c01f_mp4a.40.2,455c4267-fc55-4658-90a8-dc265e3520cf_256x144_392388_D2659009_B323257A64002_F25A44100_avc1.42c01f_mp4a.40.2&sign=KR9iDC4fgi6kECQARYT3Ng&expire=1795335522&guarantee=6&scheme=https' -H 'Referer: https://rutube.ru/' -o /tmp/m2.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n'
++ grep -c EXT-X-STREAM-INF /tmp/m2.m3u8
++ grep -o 'RESOLUTION=[0-9x]*' /tmp/m2.m3u8
++ head -4
++ echo -e '\n## kiosk page 2'
++ get 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=20'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=20'
++ jq -c '{n:(.results|length),next}'
++ echo -e '\n## channel page url check'
++ for u in "https://rutube.ru/channel/5223991/" "https://rutube.ru/video/person/5223991/"
++ printf '\n- %s ' https://rutube.ru/channel/5223991/
++ get https://rutube.ru/channel/5223991/ -o /dev/null -w 'http=%{http_code} final=%{url_effective}\n'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://rutube.ru/channel/5223991/ -o /dev/null -w 'http=%{http_code} final=%{url_effective}\n'
++ for u in "https://rutube.ru/channel/5223991/" "https://rutube.ru/video/person/5223991/"
++ printf '\n- %s ' https://rutube.ru/video/person/5223991/
++ get https://rutube.ru/video/person/5223991/ -o /dev/null -w 'http=%{http_code} final=%{url_effective}\n'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://rutube.ru/video/person/5223991/ -o /dev/null -w 'http=%{http_code} final=%{url_effective}\n'
