@@ -5,3 +5,6 @@ local.properties
 *.iml
 # signing keys must never be committed
 *.key
+
+# local reference images from image search
+image-search/
