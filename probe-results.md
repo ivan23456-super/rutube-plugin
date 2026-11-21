@@ -1,25 +1,38 @@
-# probe12 Sat Nov 21 08:58:19 UTC 2026
-http=200 bytes=207063
-## around playlist/custom
-,i=n(4481);n.d(t,{},{e:{fetchPlaylistMeta:e=>(0,r.uj)((0,i.Y)(`api/page_options/page_meta/catalog/playlist/${e}/`)),fetchPlaylistInfo:e=>(0,r.uj)((0,i.Y)(`/api/playlist/custom/${e}/`)),fetchPlaylistVideos:e=>(0,r.uj)((0,i.Y)(`/api/playlist/custom/${e.playlistId}/videos/`,{params:{page:e.page,limit:e.limit,video_id:e.videoId,sort:e.sortValue,sort_random_seed:e.sortRandomSee
-## around author
-CAROUSEL:"PLAYER_CAROUSEL",BANNER_CAROUSEL:"BANNER_CAROUSEL"},a:{AUTHORIZATION:"authorization"}})},29155(e,t,n){n.d(t,{},{l:{BANNED_USER_CANT_COMMENT:"Вы\xa0пока не\xa0можете комментировать: автор ограничил
-t}=e;return(0,r.uj)((0,i.Y)("/api/comments/channel/block/",{method:"POST",data:{user_id:t}}))},reactToComment:(e,t)=>(0,r.uj)((0,i.Y)(`/api/comments/${t}/reactions/`,{method:"PUT",data:{reaction:e}})),delete
-(e=>{let{broadcast_category:t,pg_rating:n,thumbnail_url:r,video_url:o,is_paid:i,author:{avatar_url:a,is_official:s,site_url:l,is_reborn_channel:c,kind_sign_for_user:u,...d},...p}=e;return{...p,pgRating:n,th
-{cb:r.nL.fetchChannelPinnedVideo,transformResponse:e=>e?{...e,video:{...e.video,author:{...e.video.author,name:(0,a.k)(e.video.author.name)}}}:null})}),videos:e.query({queryFn:(0,o.t8)({cb:r.nL.fetchUserCha
-nnelSearchResult:e=>(0,r.E7)((0,s.Y)("/api/search/video",{params:{query:e.query,author_ids:e.userChannelId,page:e.page}})),fetchUserChannelFavoritePlaylists:e=>(0,r.uj)((0,s.Y)("/api/metainfo/playlist/favorite
-},checkStreamSlots:()=>(0,o.uj)((0,i.Y)(`${window.__env__.API}/api/video/stream/owner`)),fetchVideoPage:a,getBanUserStatus:e=>(0,o.uj)((0,i.Y)(` /api/comments/blocked/video/${e}`)),getReactionsCount:s,getU
-!a||"child"===e.status;e.canCreateChildProfile=!!s,e.hasChildProfile=!!l;let c={user_id:r?.id,rupass_id:r?.rupassId,avatar:r?.avatarUrl},u={user_id:a?.user_id??i?.squirrel_id,rupass_id:i?.rupass_id,avatar:a?
-id","screen_name","session_id","sso_id","sso_source","touch_point","user_auth","user_id","uuid","user_subscription","user_subscription_id","safe_mode","pageload_id","api_method","batch_id","segment_id"],I=e=
-).getAll("utm_medium"),k=_?{category:c?.category.short_name,channelId:String(c?.author.id??""),videoId:c?.id}:{},I={userId:t,slug:n,cid:(0,g.fL)(),platform:b.f.isMobile()?"browser_mobile":"browser",subscrib
-ow().toString(),event_timezone:(i()().utcOffset()/60).toString(),user_auth:I(t),user_id:t?.toString(),uuid:(0,r.yk)(),user_subscription:n(()=>I("ACTIVE"===(0,m.oy)(e))),user_subscription_id:n(()=>(0,m.ch)(e)
-## channelTab playlist functions
-voritePlaylists}),providesTags:["USER_CHANNEL_FAVORITE_PLAYLISTS"]}),pinnedPlaylists:e.query({queryFn:(0,o.t8)({cb:r.nL.fetchChannelPinnedPlaylists,transformResponse:e=>({...e,results:e.results?.filter(e=>e.videos.length>0)||[]})}),...(0,o.pq)(e=>e?.query?.page,{cacheKeys:["channelId"]})}),channelRecommendations:e.query({queryFn:(0,o.t8)({cb:r.nL.fetchChannelRecomm
-erChannelFavoritePlaylists:e=>(0,r.uj)((0,s.Y)("/api/metainfo/playlist/favorite",{params:{author_id:e.userChannelId}})),fetchChannelPinnedPlaylists:e=>{let t={page:1,limit:10,order_by:"created_ts_desc",limit_video:20,...e.query};return(0,r.uj)((0,s.Y)(`api/v1/channels/${e.channelId}/pinned_playlists`,{params:t}))},fetchChannelRecommendations:(e,t)=>{let n={source:"
-context:w,content_type:(0,_.gt)(t.resourceItem),channel_id:(0,h.r9)(n),content_id:t.resourceItem?.id}}).commit().event("channelTabMainPlaylist").params().permit(e=>{let{params:t}=e;return!t.isSubscribed}).message(e=>{let{context:t}=e;return{event_context:w,channel_id:(0,h.r9)(t)}}).commit().event("channelTabMainAudio").params().permit(e=>{let{params:t}=e;retur
-## api paths with query templates
-/api/playlist/custom/${e.playlistId}/videos/
-/api/playlist/custom/${e}/
-/api/playlist/future/list/
-/api/playlist/future/video/${e}/
-/api/playlist/user/${t}
+# probe13 Sat Nov 21 08:58:52 UTC 2026
+
+## playlist/user
+https://rutube.ru/api/playlist/user/5223991/?format=json&page=1&limit=20
+http=200 bytes=669
+{"count":null,"next":null,"n":1,"firstKeys":["author","author_sort_order","created_ts","id","is_hidden","is_official","is_reborn_channel","kind_sign_for_user","last_modified_ts","pepper","thumbnail_url","title","videos_count"]}
+
+## playlist/user no format
+https://rutube.ru/api/playlist/user/5223991/?page=1&limit=20
+http=200 bytes=669
+{"count":null,"next":null,"n":1,"firstKeys":["author","author_sort_order","created_ts","id","is_hidden","is_official","is_reborn_channel","kind_sign_for_user","last_modified_ts","pepper","thumbnail_url","title","videos_count"]}
+
+## pinned_playlists
+https://rutube.ru/api/v1/channels/5223991/pinned_playlists?page=1&limit=10&order_by=created_ts_desc&limit_video=20
+http=204 bytes=0
+
+## favorite playlists
+https://rutube.ru/api/metainfo/playlist/favorite?author_id=5223991&format=json
+http=401 bytes=59
+
+## playlist/user first item (full)
+{"id":1920264,"title":"Кот Костян Новое","videos_count":2,"created_ts":"2026-11-18T23:21:49+03:00","last_modified_ts":"2026-11-19T17:34:09+03:00","thumbnail_url":"https://pic.rtbcdn.ru/playlist/2026/11/18/0a/5c/a8cbe089-e38d-11f1-9d12-26d12b8e975f.jpg","author_sort_order":"","author":{"id":5223991,"name":"Кот Костян","avatar_url":"https://pic.rtbcdn.ru/user/e1/22/e122969ed236afacbeeddaaf5f95e177.jpeg","site_url":"https://rutube.ru/video/person/5223991/"},"is_official":false,"kind_sign_for_user":true,"is_reborn_channel":false,"is_hidden":false,"pepper":null}
+
+## pinned first item
+
+## playlist id -> 1920264
+
+## playlist info
+https://rutube.ru/api/playlist/custom/1920264/?format=json
+http=200 bytes=558
+
+## playlist videos
+https://rutube.ru/api/playlist/custom/1920264/videos/?page=1&limit=20&format=json
+http=200 bytes=3379
+{"count":null,"next":null,"n":2,"firstKeys":["action_reason","author","category","created_ts","description","duration","embed_url","feed_name","feed_url","hits","id","is_adult","is_audio","is_deleted","is_hidden","is_livestream","is_locked","is_official","is_original_content","is_paid","kind_sign_for_user","origin_type","pg_rating","product_id","publication_ts","stream_type","thumbnail_url","title","video_url"]}
+
+## playlist videos first item keys
+{"count":null,"n":2,"keys":["action_reason","author","category","created_ts","description","duration","embed_url","feed_name","feed_url","hits","id","is_adult","is_audio","is_deleted","is_hidden","is_livestream","is_locked","is_official","is_original_content","is_paid","kind_sign_for_user","origin_type","pg_rating","product_id","publication_ts","stream_type","thumbnail_url","title","video_url"]}
