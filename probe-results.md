@@ -1,31 +1,41 @@
-# probe14 Sat Nov 21 09:00:15 UTC 2026
+# probe15 Sat Nov 21 09:07:31 UTC 2026
 
-## https://rutube.ru/
-spid
+## HTML https://rutube.ru/tv/
+http=500 bytes=615
 
-## https://rutube.ru/video/5f2b73ea71eb50d45e280e3fa5a31572/
+## HTML https://rutube.ru/tv/channels/
+http=500 bytes=615
 
-## https://rutube.ru/api/video/5f2b73ea71eb50d45e280e3fa5a31572/?format=json
-qrator_msid2
+## HTML https://rutube.ru/tv/
+http=500 bytes=615
 
-## auth-ish endpoints (anon)
-https://rutube.ru/api/auth/whoami/?format=json -> 404 <html>
-<title>404 Not Found</title>
-<style>html{color-scheme:light dark;}</style>
-</head>
-<body>
-<center><h1>404 No
-https://rutube.ru/api/profile/current/?format=json -> 404 
-<!doctype html>
-<html lang="en">
-<head>
-  <title>Not Found</title>
-</head>
-<body>
-  <h1>Not Found</h1><p>The requested 
-https://rutube.ru/api/v3/auth/check/?format=json -> 404 <html>
-<title>404 Not Found</title>
-<style>html{color-scheme:light dark;}</style>
-</head>
-<body>
-<center><h1>404 No
+## https://rutube.ru/api/video/tv/?format=json
+http=404 bytes=179
+
+## https://rutube.ru/api/tv/channels/?format=json
+http=404 bytes=591
+
+## https://rutube.ru/api/tv/?format=json
+http=404 bytes=591
+
+## https://rutube.ru/api/metainfo/tv/?format=json
+http=200 bytes=179059
+{"keys":["has_next","next","page","per_page","previous","results"],"n":100,"first":{"id":1,"title":null,"name":"Deleted TV show","is_livestream":null,"video_url":null,"slug":null,"url":null}}
+
+## https://rutube.ru/api/tv/channel/?format=json
+http=404 bytes=591
+
+## https://rutube.ru/api/video/tv/channels/?format=json
+http=404 bytes=179
+
+## https://rutube.ru/api/live/tv/?format=json
+http=404 bytes=591
+
+## https://rutube.ru/api/v1/tv/channels/?format=json
+http=404 bytes=591
+
+## https://rutube.ru/api/metainfo/tv/channels/?format=json
+http=404 bytes=179
+
+## https://rutube.ru/api/tv/channels/list/?format=json
+http=404 bytes=591
