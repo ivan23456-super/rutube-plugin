@@ -89,14 +89,15 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
                 RuTubeParsingHelper.withPrivateToken(
                         String.format(RuTubeParsingHelper.VIDEO_API, videoId),
                         privateToken));
+        if (RuTubeParsingHelper.getBoolean(video, "is_deleted")) {
+            throw new ExtractionException("This video has been deleted");
+        }
+        ensureBroadcastIsPlayable();
+
         options = RuTubeParsingHelper.fetchJson(downloader,
                 RuTubeParsingHelper.withPrivateToken(
                         String.format(RuTubeParsingHelper.PLAY_OPTIONS_API, videoId),
                         privateToken));
-
-        if (RuTubeParsingHelper.getBoolean(video, "is_deleted")) {
-            throw new ExtractionException("This video has been deleted");
-        }
 
         final JsonObject acl = RuTubeParsingHelper.getObject(options, "acl_access");
         if (acl != null && acl.has("allowed")
@@ -109,6 +110,22 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
 
         extractHlsUrl();
         extractSubtitles();
+    }
+
+    /**
+     * A finished broadcast stays a "live stream" in the API forever, but its play
+     * options only answer with a {@code stream_access_fail} stub. Check the video
+     * metadata first so the user gets "эфир завершён" instead of a raw stub code.
+     */
+    private void ensureBroadcastIsPlayable() throws ExtractionException {
+        if (!RuTubeParsingHelper.isFinishedBroadcast(video)) {
+            return;
+        }
+        if (RuTubeParsingHelper.getObject(video, "future_publication") != null) {
+            throw new ExtractionException("Трансляция ещё не началась");
+        }
+        throw new ExtractionException(
+                "Трансляция завершена: RuTube не сохранил запись этого эфира");
     }
 
     private void extractHlsUrl() {

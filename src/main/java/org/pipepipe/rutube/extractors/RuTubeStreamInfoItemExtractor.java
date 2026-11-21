@@ -50,8 +50,15 @@ public final class RuTubeStreamInfoItemExtractor implements StreamInfoItemExtrac
 
     @Override
     public StreamType getStreamType() {
-        if (RuTubeParsingHelper.getBoolean(video, "is_livestream")
-                || RuTubeParsingHelper.getBoolean(video, "is_on_air")) {
+        // Lists without an is_on_air field (the TV channel feed) only flag
+        // live streams, so is_livestream is trusted there. Where the field is
+        // present it wins: a finished broadcast keeps is_livestream=true and
+        // must not be shown with a LIVE badge.
+        final boolean live = RuTubeParsingHelper.getBoolean(video, "is_livestream")
+                || RuTubeParsingHelper.getBoolean(video, "is_on_air");
+        final boolean onAir = !video.has("is_on_air")
+                || RuTubeParsingHelper.getBoolean(video, "is_on_air");
+        if (live && onAir) {
             return StreamType.LIVE_STREAM;
         }
         if (RuTubeParsingHelper.getBoolean(video, "is_audio")) {

@@ -218,6 +218,10 @@ public final class RuTubeParsingHelper {
                     + "войдите в аккаунт RuTube (Настройки → Плагины → RuTube), "
                     + "где возраст уже подтверждён.";
         }
+        if ("stream_access_fail".equals(reason)) {
+            return "RuTube не отдаёт поток: эфир завершён или доступ к нему закрыт "
+                    + "(stream_access_fail)";
+        }
         if ("blocking_rule".equals(type) || reason.contains("blocking")
                 || reason.contains("geo")) {
             return "RuTube не отдаёт это видео для вашего региона "
@@ -239,7 +243,9 @@ public final class RuTubeParsingHelper {
     @Nonnull
     private static String describeSubscription(@Nonnull final String reason) {
         final String code = reason.replaceFirst("^subscription:?\\s*", "").trim();
-        final String human = subscriptionName(code);
+        // RuTube answers either a product code (SPORT) or an already localized
+        // product name (Подписка PREMIER): only codes are looked up here.
+        final String human = code.matches("[A-Za-z0-9_.-]+") ? subscriptionName(code) : code;
         final StringBuilder message = new StringBuilder("Трансляция доступна только по подписке RuTube");
         if (!human.isEmpty()) {
             message.append(" «").append(human).append('»');
@@ -510,6 +516,21 @@ public final class RuTubeParsingHelper {
     // ------------------------------------------------------------------
     // URLs
     // ------------------------------------------------------------------
+
+    /**
+     * RuTube keeps every broadcast in its lists forever and leaves
+     * {@code is_livestream} set to {@code true} after the stream ended. The only
+     * reliable flag is {@code is_on_air}: a finished broadcast that has no stored
+     * recording reports {@code is_on_air=false} with {@code duration<=0} and its
+     * play options answer with a {@code stream_access_fail} stub, so it cannot be
+     * played at all.
+     */
+    public static boolean isFinishedBroadcast(@Nonnull final JsonObject item) {
+        return item.has("is_on_air")
+                && !getBoolean(item, "is_on_air")
+                && getBoolean(item, "is_livestream")
+                && getLong(item, "duration", 0) <= 0;
+    }
 
     /**
      * Resolves the URL of the next page of a paginated API result. RuTube usually

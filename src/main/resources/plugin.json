@@ -1,8 +1,8 @@
 {
   "pluginId": "org.pipepipe.rutube",
   "name": "RuTube",
-  "versionCode": 3,
-  "versionName": "1.0.2",
+  "versionCode": 4,
+  "versionName": "1.0.3",
   "apiVersion": "1.0",
   "author": "ivan23456-super",
   "entryClass": "org.pipepipe.rutube.RuTubePlugin",
