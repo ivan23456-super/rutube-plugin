@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "name": "RuTube PipePipe Plugins",
+  "plugins": [
+    {
+      "pluginId": "org.pipepipe.rutube",
+      "name": "RuTube",
+      "versionCode": 1,
+      "versionName": "1.0.0",
+      "apiVersion": "1.0",
+      "author": "ivan23456-super",
+      "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-1.ppp",
+      "sha256": "e53daf9d8e0c81542948e7caac5411fddbd8d4fd75be23c93790b2350856ed67",
+      "signature": "CWFKK90Rg29m5XqoCsDye9Nvn5NAmDA7TTAeS8JFtPOVpAECoacXRTeZdDBvq/wow059R9NWWLnn0lbSrjW4Dg==",
+      "publicKey": "uhLHW2c0F7CKho5VNJwJFlLuN6cs1UKcPPN3SeaL738=",
+      "description": "RuTube video hosting: videos, live streams, Shorts, channels, playlists, search and comments.",
+      "nsfw": false
+    }
+  ]
+}
