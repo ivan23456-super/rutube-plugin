@@ -1,8 +1,9 @@
 name: Build package
 
-# Builds the .ppp with a throwaway key and commits the unsigned-content package
-# to ci-artifacts/. The package contents (classes.dex + plugin.json) do not
-# depend on the signing key, so the real key can re-sign it afterwards.
+# Builds the .ppp. When the PLUGIN_SIGNING_KEY secret is set, the package is
+# signed with the real key and published to release/ (that is what users
+# install); otherwise the build only validates that the plugin compiles, dexes
+# and produces a valid index, with a throwaway key.
 on:
   workflow_dispatch:
   push:
@@ -26,16 +27,38 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;37.0.0" "platforms;android-36"
       - name: Build and index
+        env:
+          SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
         run: |
-          ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key"
-          ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key"
-      - name: Commit the package
+          set -euo pipefail
+          if [ -n "${SIGNING_KEY:-}" ]; then
+            printf '%s' "$SIGNING_KEY" > "$RUNNER_TEMP/signing.key"
+            ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/signing.key"
+            echo "SIGNED=1" >> "$GITHUB_ENV"
+          else
+            ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key"
+            ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key"
+            echo "SIGNED=0" >> "$GITHUB_ENV"
+            echo "::warning::PLUGIN_SIGNING_KEY secret is not set, the package is signed with a throwaway key"
+          fi
+      - name: Publish signed package to release/
+        if: env.SIGNED == '1'
         run: |
-          mkdir -p ci-artifacts
-          cp build/repo/*.ppp ci-artifacts/
+          set -euo pipefail
+          mkdir -p release
+          rm -f release/*.ppp
+          cp build/repo/*.ppp release/
+          pkg=$(basename "$(ls build/repo/*.ppp | head -1)")
+          url="https://raw.githubusercontent.com/${{ github.repository }}/main/release/${pkg}"
+          jq --arg u "$url" '.plugins = [(.plugins[0] | .package = $u)]' \
+            build/repo/index.json > release/index.json
+          cat release/index.json
+      - name: Commit the release
+        if: env.SIGNED == '1'
+        run: |
           git config user.name "build-bot"
           git config user.email "build-bot@users.noreply.github.com"
-          git add ci-artifacts
-          git commit -m "build: package $(date -u +%Y-%m-%dT%H:%MZ)" || exit 0
+          git add release
+          git commit -m "release: $(jq -r '.plugins[0].versionName' release/index.json)" || exit 0
           git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
