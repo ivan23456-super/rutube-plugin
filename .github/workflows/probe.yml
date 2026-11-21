@@ -13,23 +13,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Probe login cookies
+      - name: Probe TV channels
         run: |
           set -u
           set +e
           OUT=probe-results.md
-          echo "# probe14 $(date -u)" > "$OUT"
+          echo "# probe15 $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
-          for u in "https://rutube.ru/" "https://rutube.ru/video/5f2b73ea71eb50d45e280e3fa5a31572/" "https://rutube.ru/api/video/5f2b73ea71eb50d45e280e3fa5a31572/?format=json"; do
+          get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
+          for u in "https://rutube.ru/tv/" "https://rutube.ru/tv/channels/" "https://rutube.ru/tv/" ; do
+            printf '\n## HTML %s\n' "$u" >> "$OUT"
+            code=$(get "$u" -o /tmp/tv.html -w '%{http_code}')
+            printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/tv.html)" >> "$OUT"
+            grep -oE 'https://rutube\.ru/api/[a-zA-Z0-9/_.-]*' /tmp/tv.html | sort -u | head -20 >> "$OUT"
+            grep -oE '"[^"]*tv[^"]*api[^"]*"|api[^"]*tv[^"]*' /tmp/tv.html | sort -u | head -20 >> "$OUT"
+            grep -oE 'href="/tv/[^"]*"' /tmp/tv.html | sort -u | head -20 >> "$OUT"
+          done
+          for u in "https://rutube.ru/api/video/tv/?format=json" "https://rutube.ru/api/tv/channels/?format=json" "https://rutube.ru/api/tv/?format=json" "https://rutube.ru/api/metainfo/tv/?format=json" "https://rutube.ru/api/tv/channel/?format=json" "https://rutube.ru/api/video/tv/channels/?format=json" "https://rutube.ru/api/live/tv/?format=json" "https://rutube.ru/api/v1/tv/channels/?format=json" "https://rutube.ru/api/metainfo/tv/channels/?format=json" "https://rutube.ru/api/tv/channels/list/?format=json"; do
             printf '\n## %s\n' "$u" >> "$OUT"
-            curl -sS -D /tmp/h -o /dev/null -A "$UA" --max-time 25 "$u"
-            grep -i '^set-cookie' /tmp/h | sed -E 's/^[Ss]et-[Cc]ookie: *([^=]+)=.*/\1/' | sort -u >> "$OUT"
+            code=$(get "$u" -o /tmp/r.json -w '%{http_code}')
+            printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/r.json)" >> "$OUT"
+            jq -c 'if type=="object" then {keys:(keys), n:(.results|length?), first:(.results[0]? // .channels[0]? // empty | if type=="object" then {id,title,name,is_livestream,video_url,slug,url} else . end)} else {type:type, n:length} end' /tmp/r.json 2>/dev/null | head -c 900 >> "$OUT"
           done
-          echo -e '\n## auth-ish endpoints (anon)' >> "$OUT"
-          for u in "https://rutube.ru/api/auth/whoami/?format=json" "https://rutube.ru/api/profile/current/?format=json" "https://rutube.ru/api/v3/auth/check/?format=json"; do
-            printf '%s -> %s\n' "$u" "$(curl -sS -o /tmp/b -w '%{http_code}' -A "$UA" --max-time 20 "$u") $(head -c 120 /tmp/b)" >> "$OUT"
-          done
-
       - name: Commit results
         if: always()
         run: |
