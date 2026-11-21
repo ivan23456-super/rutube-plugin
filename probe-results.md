@@ -1,59 +1,41 @@
-# probe4 Sat Nov 21 08:15:22 UTC 2026
+# probe5 Sat Nov 21 08:17:17 UTC 2026
 
-## ordering variants
+## distinct content types, query=сборник pages 1-3
 
-- order_by=publication_ts_down
+- page 1: [{"ad":1},{"video":20}]
 
-- order_by=publication_ts_up
+- page 2: [{"video":20}]
 
-- sort_by=created
-["2025-09-14T20:40:51","2026-02-16T17:26:33","2026-03-03T23:15:30"]
+- page 3: [{"video":20}]
 
-- sort=-created
-["2025-09-14T20:40:51","2026-02-16T17:26:33","2026-03-03T23:15:30"]
+## playlist endpoint candidates (query=кот)
 
-- ordering=created
-["2025-09-14T20:40:51","2026-02-16T17:26:33","2026-03-03T23:15:30"]
+- https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1
+http=404 bytes=275 
+- https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1
+http=404 bytes=277 
+- https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1
+http=404 bytes=259 
+- https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist
+http=200 bytes=37977 {"n":21,"types":[{"ad":1},{"video":20}],"first":["block_code","content_type","position_rule"]}
 
-- order_by=created_ts_down&client=wdp
-["2025-09-14T20:40:51","2026-02-16T17:26:33","2026-03-03T23:15:30"]
+- https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists
+http=200 bytes=3446 {"n":3,"types":[{"userchannel":3}],"first":["absolute_url","can_subscribe","content","description","icon","id","is_official","is_original_content","is_original_sticker_2x2","is_reborn_channel","name","picture","subscribers_count","subscription_url","type","user_channel_image","video_count","view_url"]}
 
-## JS bundles mentioning order_by
-src="https://yandex.ru/ads/system/context.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/1360.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/4791.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5643.js"
-src="https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6126.js"
+- https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author
+http=200 bytes=3446 {"n":3,"types":[{"userchannel":3}],"first":["absolute_url","can_subscribe","content","description","icon","id","is_official","is_original_content","is_original_sticker_2x2","is_reborn_channel","name","picture","subscribers_count","subscription_url","type","user_channel_image","video_count","view_url"]}
 
-- https://yandex.ru/ads/system/context.js (508116 bytes)
-duration=performance
+- https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist
+http=200 bytes=3446 {"n":3,"types":[{"userchannel":3}],"first":["absolute_url","can_subscribe","content","description","icon","id","is_official","is_original_content","is_original_sticker_2x2","is_reborn_channel","name","picture","subscribers_count","subscription_url","type","user_channel_image","video_count","view_url"]}
 
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js (130339 bytes)
+## does cards/list playlist support filter+page
+{"count":3,"n":3,"names":["ЕвгенБро сборник серий","Ютуб сборник","Синий трактор - Песенки и мультики для детей"]}
 
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016 (31293 bytes)
+## shorts manual page 2
+{"count":100,"n":20,"next":"http://search-backend.rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=3&per_page=20"}
 
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js (188105 bytes)
+## video_playlist manual page 2 with filters
+{"count":20,"n":20,"next":"https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?client=wdp&page=3&per_page=20&query=%D0%BA%D0%BE%D1%82&created=week&duration=short"}
 
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js (10230 bytes)
-
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js (5978 bytes)
-
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js (71864 bytes)
-duration=function
-
-- https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js (138515 bytes)
-
-## cards playlist first item
-{"id":5223991,"name":"Кот Костян","description":"Привет!!! Я обычный говорящий кот, коих в России тысячи!!!  Просто вы их не слушаете!\nТелеграм  -https://t.me/kotkostyanchik1\nМАХ - https://max.ru/kotreal\nVK - https://vk.com/sumrak6969\nПо рекламе - satumrak11111@yandex.ru","can_subscribe":true,"type":{"id":145,"name":"userchannel","title":"Канал пользователя"},"picture":"https://pic.rtbcdn.ru/userappearance/2026-06-10/7c/2f/7c2fee0bf55b1a29994cbea2a348512b.jpeg","absolute_url":"https://rutube.ru/video/person/5223991/","icon":"https://pic.rtbcdn.ru/user/e1/22/e122969ed236afacbeeddaaf5f95e177.jpeg","content":"https://rutube.ru/api/video/person/5223991/","view_url":"https://rutube.ru/api/video/person/5223991/","subscription_url":"https://rutube.ru/api/subscription/card/userchannel/5223991","video_count":236,"subscribers_count":131056,"user_channel_image":"https://pic.rtbcdn.ru/userappearance/2026-06-10/7c/2f/7c2fee0bf55b1a29994cbea2a348512b.jpeg?size=w306","is_official":false,"is_original_content":false,"is_reborn_channel":true,"is_original_sticker_2x2":false}
-
-## shorts next over https
-
-## channel cards next over https
-{"count":100,"next":"https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=2&content_type=channel&per_page=20","first":{"name":"Кот Костян","view_url":"https://rutube.ru/api/video/person/5223991/","id":5223991,"type":{"id":145,"name":"userchannel","title":"Канал пользователя"}}}
+## kiosk recommendation item keys + ad tick
+{"n":10,"next":"https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=20","keys":["action_reason","age_range","author","category","created_ts","description","duration","embed_url","feed_name","feed_url","hits","html","id","is_adult","is_audio","is_classic","is_club","is_deleted","is_hidden","is_licensed","is_livestream","is_locked","is_official","is_on_air","is_original_content","is_original_sticker_2x2","is_paid","is_reborn_channel","kind_sign_for_user","last_update_ts","origin_type","pg_rating","picture_url","position","preview_url","product_id","publication_ts","stream_type","thumbnail_url","title","track_id","video_url"],"first":{"title":"ТРИ КОТА | ТРИ КОТА ","is_livestream":false,"id":"679ca28c05f4b04728d3b54af50a11d3"}}

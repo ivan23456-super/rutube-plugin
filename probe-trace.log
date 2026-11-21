@@ -270,3 +270,100 @@ curl: (6) Could not resolve host: search-backend.rutube.ru
 + get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=channel'
 + curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=channel'
 + jq -c '{count,next,first:(.results[0]|{name,view_url,id,type})}'
++ OUT=probe-results.md
+++ date -u
++ echo '# probe5 Sat Nov 21 08:17:17 UTC 2026'
++ UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
++ P=https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist
++ echo -e '\n## distinct content types, query=сборник pages 1-3'
++ for p in 1 2 3
++ url='https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1'
++ printf '\n- page %s: ' 1
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1'
++ jq -c '[.results[]|(.content_type//"?")]|group_by(.)|map({(.[0]):length})'
++ for p in 1 2 3
++ url='https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=2'
++ printf '\n- page %s: ' 2
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=2'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=2'
++ jq -c '[.results[]|(.content_type//"?")]|group_by(.)|map({(.[0]):length})'
++ for p in 1 2 3
++ url='https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=3'
++ printf '\n- page %s: ' 3
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=3'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=3'
++ jq -c '[.results[]|(.content_type//"?")]|group_by(.)|map({(.[0]):length})'
++ echo -e '\n## playlist endpoint candidates (query=кот)'
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1'
+++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
++ code=404
+++ wc -c
++ printf 'http=%s bytes=%s ' 404 275
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1'
+++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
++ code=404
+++ wc -c
++ printf 'http=%s bytes=%s ' 404 277
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1'
+++ get 'https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1' -o /tmp/x.json -w '%{http_code}'
++ code=404
+++ wc -c
++ printf 'http=%s bytes=%s ' 404 259
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist'
+++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist' -o /tmp/x.json -w '%{http_code}'
++ code=200
+++ wc -c
++ printf 'http=%s bytes=%s ' 200 37977
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists'
+++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists' -o /tmp/x.json -w '%{http_code}'
++ code=200
+++ wc -c
++ printf 'http=%s bytes=%s ' 200 3446
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author'
+++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author' -o /tmp/x.json -w '%{http_code}'
++ code=200
+++ wc -c
++ printf 'http=%s bytes=%s ' 200 3446
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ for u in "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist"
++ printf '\n- %s\n' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist'
+++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist' -o /tmp/x.json -w '%{http_code}'
+++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist' -o /tmp/x.json -w '%{http_code}'
++ code=200
+++ wc -c
++ printf 'http=%s bytes=%s ' 200 3446
++ jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json
++ echo -e '\n## does cards/list playlist support filter+page'
++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1&content_type=playlist&per_page=20'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1&content_type=playlist&per_page=20'
++ jq -c '{count,n:(.results|length),names:[.results[]|.name][:3]}'
++ echo -e '\n## shorts manual page 2'
++ get 'https://rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=2&per_page=20'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=2&per_page=20'
++ jq -c '{count,n:(.results|length),next}'
++ echo -e '\n## video_playlist manual page 2 with filters'
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=2&created=week&duration=short'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=2&created=week&duration=short'
++ jq -c '{count,n:(.results|length),next}'
++ echo -e '\n## kiosk recommendation item keys + ad tick'
++ get 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=0'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=0'
++ jq -c '{n:(.results|length),next,keys:(.results[3]|keys),first:(.results[3]|{title:(.title|.[0:20]),is_livestream,id})}'
