@@ -130,3 +130,143 @@ jq: error (at <stdin>:0): Cannot iterate over null (null)
 + head -3
 + grep -o 'created[^",]\{0,30\}' /tmp/s.html
 + head -3
++ OUT=probe-results.md
+++ date -u
++ echo '# probe4 Sat Nov 21 08:15:22 UTC 2026'
++ UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
++ q=%D0%BA%D0%BE%D1%82
++ P=https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist
++ echo -e '\n## ordering variants'
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' order_by=publication_ts_down
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=publication_ts_down'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=publication_ts_down'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
+jq: error (at <stdin>:0): Cannot iterate over null (null)
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' order_by=publication_ts_up
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=publication_ts_up'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=publication_ts_up'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
+jq: error (at <stdin>:0): Cannot iterate over null (null)
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' sort_by=created
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort_by=created'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort_by=created'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' sort=-created
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=-created'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=-created'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' ordering=created
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&ordering=created'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&ordering=created'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
++ for v in 'order_by=publication_ts_down' 'order_by=publication_ts_up' 'sort_by=created' 'sort=-created' 'ordering=created' 'order_by=created_ts_down&client=wdp'
++ printf '\n- %s\n' 'order_by=created_ts_down&client=wdp'
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_down&client=wdp'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_down&client=wdp'
++ jq -c '[.results[]|select(.content_type=="video")|.created_ts][:3]'
++ echo -e '\n## JS bundles mentioning order_by'
++ get 'https://rutube.ru/search/?query=%D0%BA%D0%BE%D1%82' -o /tmp/s.html
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/search/?query=%D0%BA%D0%BE%D1%82' -o /tmp/s.html
++ grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html
++ head -12
+++ grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html
+++ sed -E 's/src="([^"]+)"/\1/'
+++ head -8
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://yandex.ru/ads/system/context.js
++ get https://yandex.ru/ads/system/context.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://yandex.ru/ads/system/context.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://yandex.ru/ads/system/context.js 508116
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/corejs.js 130339
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url='https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016'
++ get 'https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016' -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016' -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' 'https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/main.js?release-woodpecker-360-0-0-8d883016' 31293
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/7294.js 188105
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/5362.js 10230
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/6857.js 5978
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/8894.js 71864
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/s.html | sed -E 's/src="([^"]+)"/\1/' | head -8)
++ case "$js" in
++ url=https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js
++ get https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js -o /tmp/b.js
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js -o /tmp/b.js
+++ wc -c
++ printf '\n- %s (%s bytes)\n' https://static.rtbcdn.ru/woodpecker/assets/release-woodpecker-360-0-0-8d883016/web/577.js 138515
++ grep -oE '(order_by|sort_by|created|duration)=[a-z_]{2,20}' /tmp/b.js
++ sort -u
++ head -12
++ echo -e '\n## cards playlist first item'
++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist'
++ jq -c '.results[0]'
++ echo -e '\n## shorts next over https'
++ get 'https://search-backend.rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=2&per_page=20'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://search-backend.rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=2&per_page=20'
++ jq -c '{count,n:(.results|length),next}'
+curl: (6) Could not resolve host: search-backend.rutube.ru
++ echo -e '\n## channel cards next over https'
++ get 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=channel'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=channel'
++ jq -c '{count,next,first:(.results[0]|{name,view_url,id,type})}'
