@@ -1,0 +1,69 @@
+name: Probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/probe.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe channel API
+        run: |
+          set -u
+          set +e
+          OUT=probe-results.md
+          echo "# probe8 $(date -u)" > "$OUT"
+          UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
+          get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
+          CH=657766   # МАТЧ!
+          CH2=5223991 # Кот Костян
+
+          echo -e '\n## profile keys' >> "$OUT"
+          get "https://rutube.ru/api/profile/user/$CH/?format=json" | jq -c '{keys:(keys), name, subscribers_count, video_count:(.video_count?), appearance:(.appearance|tostring|.[0:200])}' >> "$OUT"
+          get "https://rutube.ru/api/profile/user/$CH2/?format=json" | jq -c '{keys:(keys), name, video_count:(.video_count?), counts:(.counts?)}' >> "$OUT"
+
+          echo -e '\n## channel page tab links' >> "$OUT"
+          get "https://rutube.ru/channel/$CH2/" -o /tmp/ch.html
+          echo "bytes=$(wc -c </tmp/ch.html)" >> "$OUT"
+          grep -oE 'channel/[0-9]+/[a-z-]+/' /tmp/ch.html | sort -u | head -20 >> "$OUT"
+          grep -oE '/api/[a-z0-9/_.-]+' /tmp/ch.html | sort -u | head -40 >> "$OUT"
+
+          echo -e '\n## origin__type matrix' >> "$OUT"
+          for o in 'rtb,rst,ifrm,rspa' 'rshorts' 'rst' 'rtb' 'ifrm' 'rspa' ''; do
+            printf '\n- origin=%s: ' "${o:-<none>}" >> "$OUT"
+            get "https://rutube.ru/api/video/person/$CH2/?page=1&format=json&origin__type=$o" -o /tmp/o.json -w 'http=%{http_code} ' >> "$OUT"
+            jq -c '{count, n:(.results|length), types:([.results[]?|(.origin_type//"?")]|group_by(.)|map({(.[0]):length}))}' /tmp/o.json >> "$OUT" 2>/dev/null || echo '' >> "$OUT"
+          done
+
+          echo -e '\n## playlist endpoint candidates' >> "$OUT"
+          for u in \
+            "https://rutube.ru/api/playlist/person/$CH2/?page=1&format=json" \
+            "https://rutube.ru/api/playlist/custom/?author=$CH2&page=1&format=json" \
+            "https://rutube.ru/api/playlist/custom/?author_id=$CH2&page=1&format=json" \
+            "https://rutube.ru/api/profile/user/$CH2/playlists/?page=1&format=json" \
+            "https://rutube.ru/api/playlist/person/$CH2/" \
+            "https://rutube.ru/api/video/person/$CH2/playlists/?format=json" \
+            "https://rutube.ru/pangolin/api/web/v1/playlist/person/$CH2/?page=1" ; do
+            printf '\n- %s\n' "$u" >> "$OUT"
+            get "$u" -o /tmp/p.json -w 'http=%{http_code} bytes=%{size_download}\n' >> "$OUT"
+            jq -c '{count,n:(.results|length?),keys:(.results[0]?|keys?)}' /tmp/p.json 2>/dev/null >> "$OUT" || head -c 100 /tmp/p.json >> "$OUT"
+          done
+
+          echo -e '\n## redux state queries on channel page' >> "$OUT"
+          grep -oE '"(channelIdBySlug|channel[A-Za-z]*|authorPlaylists|playlists?)[A-Za-z]*"' /tmp/ch.html | sort -u | head -20 >> "$OUT"
+
+      - name: Commit results
+        if: always()
+        run: |
+          git config user.name probe-bot
+          git config user.email probe-bot@users.noreply.github.com
+          git add probe-results.md
+          git commit -m "probe: channel api" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
