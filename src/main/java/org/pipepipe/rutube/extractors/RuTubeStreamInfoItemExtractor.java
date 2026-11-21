@@ -62,7 +62,8 @@ public final class RuTubeStreamInfoItemExtractor implements StreamInfoItemExtrac
 
     @Override
     public long getDuration() {
-        return RuTubeParsingHelper.getLong(video, "duration", 0);
+        // Live streams carry no duration; -1 keeps the app from showing "0:00".
+        return RuTubeParsingHelper.getLong(video, "duration", -1);
     }
 
     @Override
