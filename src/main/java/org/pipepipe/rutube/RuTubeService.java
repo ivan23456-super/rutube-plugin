@@ -13,6 +13,7 @@ import org.pipepipe.rutube.extractors.RuTubePlaylistExtractor;
 import org.pipepipe.rutube.extractors.RuTubeSearchExtractor;
 import org.pipepipe.rutube.extractors.RuTubeStreamExtractor;
 import org.pipepipe.rutube.extractors.RuTubeSuggestionExtractor;
+import org.pipepipe.rutube.extractors.RuTubeTvKioskExtractor;
 import org.pipepipe.rutube.linkHandler.RuTubeChannelLinkHandlerFactory;
 import org.pipepipe.rutube.linkHandler.RuTubeChannelTabLinkHandlerFactory;
 import org.pipepipe.rutube.linkHandler.RuTubeCommentsLinkHandlerFactory;
@@ -20,6 +21,7 @@ import org.pipepipe.rutube.linkHandler.RuTubeKioskLinkHandlerFactory;
 import org.pipepipe.rutube.linkHandler.RuTubePlaylistLinkHandlerFactory;
 import org.pipepipe.rutube.linkHandler.RuTubeSearchQueryHandlerFactory;
 import org.pipepipe.rutube.linkHandler.RuTubeStreamLinkHandlerFactory;
+import org.pipepipe.rutube.linkHandler.RuTubeTvKioskLinkHandlerFactory;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.channel.ChannelExtractor;
 import org.schabi.newpipe.extractor.channel.ChannelTabExtractor;
@@ -129,12 +131,18 @@ public final class RuTubeService extends StreamingService {
         final KioskList.KioskExtractorFactory kioskFactory = (streamingService, url, id) ->
                 new RuTubeKioskExtractor(streamingService,
                         RuTubeKioskLinkHandlerFactory.getInstance().fromId(id), id);
+        final KioskList.KioskExtractorFactory tvKioskFactory = (streamingService, url, id) ->
+                new RuTubeTvKioskExtractor(streamingService,
+                        RuTubeTvKioskLinkHandlerFactory.getInstance().fromId(id), id);
 
         final KioskList list = new KioskList(this);
         try {
             list.addKioskEntry(kioskFactory,
                     RuTubeKioskLinkHandlerFactory.getInstance(),
                     RuTubeKioskLinkHandlerFactory.KIOSK_TRENDING);
+            list.addKioskEntry(tvKioskFactory,
+                    RuTubeTvKioskLinkHandlerFactory.getInstance(),
+                    RuTubeTvKioskLinkHandlerFactory.KIOSK_TV);
             list.setDefaultKiosk(RuTubeKioskLinkHandlerFactory.KIOSK_TRENDING);
         } catch (final Exception e) {
             throw new ExtractionException(e);

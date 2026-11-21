@@ -78,6 +78,9 @@ public final class RuTubeParsingHelper {
     public static final String SEARCH_SUGGEST_API = API_BASE + "/search/suggest";
     /** Video comments (cursor pagination via the {@code next} URL). */
     public static final String COMMENTS_API = API_BASE + "/v3/comments/video/%s/?limit=20";
+    /** Live TV channels of the site's "ТВ онлайн" section ({@code /feeds/live/}). */
+    public static final String TV_CHANNELS_API = API_BASE
+            + "/v2/video/stream/tvbroadcastinfo?tvprogramm=false&alias=all&category=1&per_page=20";
     /** Homepage / trending feed, used for the kiosk. */
     public static final String RECOMMENDATION_API =
             API_BASE + "/v2/video/recommendation/main?limit=20&offset=%s";
