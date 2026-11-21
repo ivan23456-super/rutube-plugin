@@ -1,138 +1,106 @@
-# API probe Sat Nov 21 08:08:24 UTC 2026
+# probe Sat Nov 21 08:10:30 UTC 2026
 
-## pangolin base
-http=200 bytes=38450
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
+## pang base
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"Котенок Котэ Сборник - З"},{"t":"video","ti":"Приколы с котами! УГАРНЫ"}]
 
-## pangolin client=wdp
-http=200 bytes=38450
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
-
-## pangolin created=day
-http=200 bytes=32580
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Мимо Зильбертруда дома я без","d":525,"live":false},{"t":"video","ti":"ког кот иба))))🥳🥳🐈⬛🐈⬛🐈⬛🐈⬛🐈⬛😹","d":0,"live":true},{"t":"video","ti":"Minecraft СУПЕР КОТ НАШЕЛ ДЕ","d":853,"live":false}]
-
-## pangolin created=week
-http=200 bytes=43204
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"НАС НЕЛЬЗЯ ОСТАВЛЯТЬ ОДНИХ! ","d":746,"live":false},{"t":"video","ti":"Новые серии - Четыре комнаты","d":1368,"live":false},{"t":"video","ti":"Как на духу / Кот Костян от ","d":595,"live":false}]
-
-## pangolin duration=short
-http=200 bytes=37579
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false},{"t":"video","ti":"В ТЕМНОЙ КОМНАТЕ - Котенок ","d":273,"live":false},{"t":"video","ti":"САМАЯ ТИХАЯ ДОБРАЯ ПЕСНЯ - К","d":227,"live":false}]
-
-## pangolin duration=medium
-http=200 bytes=48612
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"НАС НЕЛЬЗЯ ОСТАВЛЯТЬ ОДНИХ! ","d":746,"live":false},{"t":"video","ti":"Разноцветные яйца и волшебны","d":378,"live":false}]
-
-## pangolin duration=long
-http=200 bytes=56850
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Видео с котами 2026😸 Смешные","d":1807,"live":false},{"t":"video","ti":"Котенок Котэ Сборник мультик","d":2498,"live":false}]
-
-## pangolin order created_down
-http=200 bytes=38475
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
-
-## pangolin order hits
-http=200 bytes=38464
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
-
-## pangolin day+short+down
-http=200 bytes=30094
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Кот Басик - Кот и огурец","d":150,"live":false},{"t":"video","ti":"собака и кот летает город","d":75,"live":false},{"t":"video","ti":"Сказка « Кот, Петух и Лиса»","d":151,"live":false}]
-
-## pangolin content=playlist
-http=200 bytes=38472
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
-
-## pangolin content=video
-http=200 bytes=38469
-{"n":21,"count":20,"keys":["count","has_movie_meta","has_next","next","page","per_page","previous","results"]}
-[{"t":"ad","ti":"","d":0,"live":false},{"t":"video","ti":"Котенок Котэ Сборник - ЗАБАВ","d":2659,"live":false},{"t":"video","ti":"Приколы с котами! УГАРНЫЕ! С","d":1117,"live":false},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ - П","d":173,"live":false}]
-
-## old base
-http=200 bytes=110
-{"n":0,"count":0,"keys":["count","current_page","has_movie_meta","has_next","next","previous","results"]}
+## pang created=all-time
+http=400 n=0
 []
 
-## old created=day
-http=200 bytes=110
-{"n":0,"count":0,"keys":["count","current_page","has_movie_meta","has_next","next","previous","results"]}
+## pang created=day
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"Мимо Зильбертруда дома я"},{"t":"video","ti":"Мама Кошка, Папа Кот и К"}]
+
+## pang duration=any
+http=400 n=0
 []
 
-## old duration=short
-http=200 bytes=110
-{"n":0,"count":0,"keys":["count","current_page","has_movie_meta","has_next","next","previous","results"]}
+## pang duration=movie
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"КОТ развлекает тебя ЦЕЛЫ"},{"t":"video","ti":"Песни Игры Котэ - Самый "}]
+
+## pang created=year
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"Приколы с котами! УГАРНЫ"},{"t":"video","ti":"ДРАНДУЛЕТ - Котенок Котэ"}]
+
+## pang default-mix (all-time+any)
+http=400 n=0
 []
 
-## old order created_down
-http=200 bytes=110
-{"n":0,"count":0,"keys":["count","current_page","has_movie_meta","has_next","next","previous","results"]}
+## pang sort=created
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"Котенок Котэ Сборник - З"},{"t":"video","ti":"Приколы с котами! УГАРНЫ"}]
+
+## pang sort=hits
+http=200 n=21
+[{"t":"ad","ti":""},{"t":"video","ti":"Котенок Котэ Сборник - З"},{"t":"video","ti":"Приколы с котами! УГАРНЫ"}]
+
+## old /api/search/video/ base
+http=200 n=0
 []
 
-## old order hits
-http=200 bytes=110
-{"n":0,"count":0,"keys":["count","current_page","has_movie_meta","has_next","next","previous","results"]}
+## old / created=week
+http=200 n=0
 []
 
-## old playlist
-http=404 bytes=179
+## old / duration=short
+http=200 n=0
+[]
 
-<!doctype html>
-<html lang="en">
-<head>
-  <title>Not Found</title>
-</head>
-<body>
-  <h1>Not Found</h1><p>The requested resource was not found on this server.</p>
-</body>
-</html>
+## old / sort=hits
+http=200 n=0
+[]
 
-## channels cards
-http=200 bytes=26248
-{"n":20,"count":100,"keys":["count","current_page","has_next","next","previous","results"]}
-[{"t":"","ti":"","d":0,"live":false},{"t":"","ti":"","d":0,"live":false},{"t":"","ti":"","d":0,"live":false},{"t":"","ti":"","d":0,"live":false}]
+## old / sort=created
+http=200 n=0
+[]
 
-## shorts
-http=200 bytes=30212
-{"n":20,"count":100,"keys":["count","current_page","has_next","info","next","previous","results"]}
-[{"t":"","ti":"#кот на компе#кот моется#кот","d":79,"live":false},{"t":"","ti":"Кот Учёный и Бэтмен Кот 🐈","d":16,"live":false},{"t":"","ti":"поющий кот","d":15,"live":false},{"t":"","ti":"Кот Фил","d":21,"live":false}]
+## old playlist /
+http=404 n=?
 
-## options plain (546602986e6a424d74d594876ddb3f04)
+## old channel /
+http=404 n=?
+
+## cards playlist
+http=200 n=2
+[{"t":"","ti":""},{"t":"","ti":""}]
+
+## shorts default-mix
+http=400 n=0
+[]
+
+## shorts created=day
+http=200 n=20
+[{"t":"","ti":"Кот и шаурма счм  парукц"},{"t":"","ti":"Кот и шаурма нова аик 12"},{"t":"","ti":"Кот дерёт диван: что реа"}]
+
+## options tnt plain id=546602986e6a424d74d594876ddb3f04 qs=format=json
 http=404 bytes=322
 {"detail": {"id": 4352552, "name": "blocking_rule_4352552", "type": "blocking_rule", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/5a/70/5a7042a5365db3acef95481c918da2f0.jpeg",
-## options referer (546602986e6a424d74d594876ddb3f04)
-http=404 bytes=323
+## options tnt rutubedl qs id=546602986e6a424d74d594876ddb3f04 qs=no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json
+http=244 bytes=322
 {"detail": {"id": 4352552, "name": "blocking_rule_4352552", "type": "blocking_rule", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/5a/70/5a7042a5365db3acef95481c918da2f0.jpeg",
-## options xff-local (546602986e6a424d74d594876ddb3f04)
-http=404 bytes=322
+## options tnt dbl-enc qs id=546602986e6a424d74d594876ddb3f04 qs=no_404=true&referer=https%253A%252F%252Frutube.ru&pver=v2&format=json
+http=244 bytes=328
 {"detail": {"id": 4352552, "name": "blocking_rule_4352552", "type": "blocking_rule", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/5a/70/5a7042a5365db3acef95481c918da2f0.jpeg",
-## options referer+xff (546602986e6a424d74d594876ddb3f04)
-http=404 bytes=323
+## options tnt qs+hdr id=546602986e6a424d74d594876ddb3f04 qs=no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json
+http=244 bytes=322
 {"detail": {"id": 4352552, "name": "blocking_rule_4352552", "type": "blocking_rule", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/5a/70/5a7042a5365db3acef95481c918da2f0.jpeg",
-## options xhr (546602986e6a424d74d594876ddb3f04)
-http=404 bytes=329
+## options tnt qs+xff id=546602986e6a424d74d594876ddb3f04 qs=no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json
+http=244 bytes=322
 {"detail": {"id": 4352552, "name": "blocking_rule_4352552", "type": "blocking_rule", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/5a/70/5a7042a5365db3acef95481c918da2f0.jpeg",
-## page https://rutube.ru/video/546602986e6a424d74d594876ddb3f04/
-http=200 bytes=295723
-m3u8: 
-balancer: 
-live: 
-blocking: 
+## live ids from pangolin created=day
 
-## page https://rutube.ru/play/embed/546602986e6a424d74d594876ddb3f04
-http=200 bytes=4208
-m3u8: 
-balancer: 
-live: 
-blocking: 
+
+## options live-feed plain id=7ee62623f6daef0e3e2e4b99c1f6edb9 qs=format=json
+http=404 bytes=648
+{"detail": {"id": 289, "name": "stream_yet_finished", "type": "player_stub", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/2025-02-18/1c/4d/1c4d7314c16747b3019d71e85891e84f.png
+## options live-feed qs id=7ee62623f6daef0e3e2e4b99c1f6edb9 qs=no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json
+http=244 bytes=648
+{"detail": {"id": 289, "name": "stream_yet_finished", "type": "player_stub", "url": "", "url_stat": "", "image": "https://pic.rtbcdn.ru/playerstub/2025-02-18/1c/4d/1c4d7314c16747b3019d71e85891e84f.png
+## options vod plain id=4ceb9757e7eec396856b7c7b08b7565a qs=format=json
+http=200 bytes=158015
+{"acl_access":{"allowed":true,"err_code":null,"err_text":""},"advert":[{"name":"preroll201","url_template":"https://playoptions.rutube.ru/adfoxsdk?ownerId=277740\u0026p1=dfdgi\u0026p2=gdol\u0026dl={{f
+## options vod qs id=4ceb9757e7eec396856b7c7b08b7565a qs=no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json
+http=200 bytes=190198
+{"acl_access":{"allowed":true,"err_code":null,"err_text":""},"advert":[{"name":"preroll201","url_template":"https://playoptions.rutube.ru/adfoxsdk?ownerId=277740\u0026p1=dfdgi\u0026p2=gdol\u0026dl={{f
