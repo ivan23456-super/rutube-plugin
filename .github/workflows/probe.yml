@@ -13,51 +13,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Probe API round 5
+      - name: Probe API round 6
         run: |
           set -u
           set +e
           exec 2>>probe-trace.log
           set -x
           OUT=probe-results.md
-          echo "# probe5 $(date -u)" > "$OUT"
+          echo "# probe6 $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
           get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
           P='https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist'
+          q='%D0%BA%D0%BE%D1%82'
 
-          echo -e '\n## distinct content types, query=сборник pages 1-3' >> "$OUT"
-          for p in 1 2 3; do
-            url="$P?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=$p"
-            printf '\n- page %s: ' "$p" >> "$OUT"
-            get "$url" | jq -c '[.results[]|(.content_type//"?")]|group_by(.)|map({(.[0]):length})' >> "$OUT"
+          echo -e '\n## filter enums' >> "$OUT"
+          for v in 'created=day' 'created=week' 'created=month' 'created=year' 'duration=short' 'duration=medium' 'duration=long' 'duration=movie' 'created=month&duration=medium'; do
+            printf '\n- %s: ' "$v" >> "$OUT"
+            get "$P?query=$q&page=1&$v" -o /tmp/f.json -w '%{http_code} ' >> "$OUT"
+            jq -c '.results|length' /tmp/f.json >> "$OUT" 2>/dev/null || echo 0 >> "$OUT"
           done
 
-          echo -e '\n## playlist endpoint candidates (query=кот)' >> "$OUT"
-          for u in \
-            "https://rutube.ru/pangolin/api/web/v1/search/combined/playlist?query=%D0%BA%D0%BE%D1%82&page=1" \
-            "https://rutube.ru/pangolin/api/web/v1/search/combined/playlists?query=%D0%BA%D0%BE%D1%82&page=1" \
-            "https://rutube.ru/pangolin/api/web/v1/search/playlists?query=%D0%BA%D0%BE%D1%82&page=1" \
-            "https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist" \
-            "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlists" \
-            "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&content_type=playlist_author" \
-            "https://rutube.ru/api/search/combined/cards/list?query=%D0%BA%D0%BE%D1%82&page=1&type=playlist" ; do
-            printf '\n- %s\n' "$u" >> "$OUT"
-            code=$(get "$u" -o /tmp/x.json -w '%{http_code}')
-            printf 'http=%s bytes=%s ' "$code" "$(wc -c </tmp/x.json)" >> "$OUT"
-            jq -c '{n:(.results|length?),types:[.results[]?|(.content_type//.type.name//"?")]|group_by(.)|map({(.[0]):length}),first:(.results[0]?|keys?)}' /tmp/x.json >> "$OUT" 2>/dev/null || head -c 120 /tmp/x.json >> "$OUT"
+          echo -e '\n## VOD options structure' >> "$OUT"
+          VOD=4ceb9757e7eec396856b7c7b08b7565a
+          get "https://rutube.ru/api/play/options/$VOD/?format=json" -o /tmp/vod.json
+          jq -c '{keys:keys, balancer:.video_balancer, live_streams:(.live_streams|tostring|.[0:200]), captions:(.captions|length)}' /tmp/vod.json >> "$OUT"
+          m3u8=$(jq -r '.video_balancer.m3u8 // .video_balancer.default // empty' /tmp/vod.json)
+          printf 'm3u8=%s\n' "$m3u8" >> "$OUT"
+          if [ -n "$m3u8" ]; then
+            echo '- plain fetch:' >> "$OUT"
+            get "$m3u8" -o /tmp/m.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n' >> "$OUT"
+            head -6 /tmp/m.m3u8 >> "$OUT"
+            echo '- referer fetch:' >> "$OUT"
+            get "$m3u8" -H 'Referer: https://rutube.ru/' -o /tmp/m2.m3u8 -w 'http=%{http_code} bytes=%{size_download}\n' >> "$OUT"
+            grep -c 'EXT-X-STREAM-INF' /tmp/m2.m3u8 >> "$OUT" 2>/dev/null
+            grep -o 'RESOLUTION=[0-9x]*' /tmp/m2.m3u8 | head -4 >> "$OUT"
+          fi
+
+          echo -e '\n## kiosk page 2' >> "$OUT"
+          get "https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=20" | jq -c '{n:(.results|length),next}' >> "$OUT"
+
+          echo -e '\n## channel page url check' >> "$OUT"
+          for u in "https://rutube.ru/channel/5223991/" "https://rutube.ru/video/person/5223991/"; do
+            printf '\n- %s ' "$u" >> "$OUT"
+            get "$u" -o /dev/null -w 'http=%{http_code} final=%{url_effective}\n' >> "$OUT"
           done
-
-          echo -e '\n## does cards/list playlist support filter+page' >> "$OUT"
-          get "https://rutube.ru/api/search/combined/cards/list?query=%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&page=1&content_type=playlist&per_page=20" | jq -c '{count,n:(.results|length),names:[.results[]|.name][:3]}' >> "$OUT"
-
-          echo -e '\n## shorts manual page 2' >> "$OUT"
-          get "https://rutube.ru/api/search/shorts?query=%D0%BA%D0%BE%D1%82&page=2&per_page=20" | jq -c '{count,n:(.results|length),next}' >> "$OUT"
-
-          echo -e '\n## video_playlist manual page 2 with filters' >> "$OUT"
-          get "$P?query=%D0%BA%D0%BE%D1%82&page=2&created=week&duration=short" | jq -c '{count,n:(.results|length),next}' >> "$OUT"
-
-          echo -e '\n## kiosk recommendation item keys + ad tick' >> "$OUT"
-          get "https://rutube.ru/api/v2/video/recommendation/main?limit=20&offset=0" | jq -c '{n:(.results|length),next,keys:(.results[3]|keys),first:(.results[3]|{title:(.title|.[0:20]),is_livestream,id})}' >> "$OUT"
 
       - name: Commit results
         if: always()
@@ -65,6 +64,6 @@ jobs:
           git config user.name probe-bot
           git config user.email probe-bot@users.noreply.github.com
           git add probe-results.md probe-trace.log
-          git commit -m "probe: round 5"
+          git commit -m "probe: round 6"
           git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
