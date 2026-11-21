@@ -13,27 +13,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Probe TV channels
+      - name: Probe live feeds
         run: |
           set -u
           set +e
           OUT=probe-results.md
-          echo "# probe15 $(date -u)" > "$OUT"
-          UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
-          get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
-          for u in "https://rutube.ru/tv/" "https://rutube.ru/tv/channels/" "https://rutube.ru/tv/" ; do
+          echo "# probe16 $(date -u)" > "$OUT"
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+          get() { curl -sS -L --max-time 25 -A "$UA" -H 'Accept: text/html,application/xhtml+xml' -H 'Accept-Language: ru-RU,ru;q=0.9' "$@"; }
+          for u in "https://rutube.ru/feeds/live/" "https://rutube.ru/feeds/rutube_live/channels/" "https://rutube.ru/tv/"; do
             printf '\n## HTML %s\n' "$u" >> "$OUT"
-            code=$(get "$u" -o /tmp/tv.html -w '%{http_code}')
-            printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/tv.html)" >> "$OUT"
-            grep -oE 'https://rutube\.ru/api/[a-zA-Z0-9/_.-]*' /tmp/tv.html | sort -u | head -20 >> "$OUT"
-            grep -oE '"[^"]*tv[^"]*api[^"]*"|api[^"]*tv[^"]*' /tmp/tv.html | sort -u | head -20 >> "$OUT"
-            grep -oE 'href="/tv/[^"]*"' /tmp/tv.html | sort -u | head -20 >> "$OUT"
+            code=$(get "$u" -o /tmp/p.html -w '%{http_code}')
+            printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/p.html)" >> "$OUT"
+            grep -oE 'https://rutube\.ru/api/[a-zA-Z0-9/_.-]*' /tmp/p.html | sort -u | head -30 >> "$OUT"
+            head -c 400 /tmp/p.html >> "$OUT"; echo >> "$OUT"
           done
-          for u in "https://rutube.ru/api/video/tv/?format=json" "https://rutube.ru/api/tv/channels/?format=json" "https://rutube.ru/api/tv/?format=json" "https://rutube.ru/api/metainfo/tv/?format=json" "https://rutube.ru/api/tv/channel/?format=json" "https://rutube.ru/api/video/tv/channels/?format=json" "https://rutube.ru/api/live/tv/?format=json" "https://rutube.ru/api/v1/tv/channels/?format=json" "https://rutube.ru/api/metainfo/tv/channels/?format=json" "https://rutube.ru/api/tv/channels/list/?format=json"; do
+          for u in "https://rutube.ru/api/feeds/live/?format=json" "https://rutube.ru/api/feeds/live/videos/?format=json" "https://rutube.ru/api/feeds/live/channels/?format=json" "https://rutube.ru/api/v2/feeds/live/?format=json" "https://rutube.ru/api/video/feeds/live/?format=json" "https://rutube.ru/api/live/feeds/?format=json"; do
             printf '\n## %s\n' "$u" >> "$OUT"
-            code=$(get "$u" -o /tmp/r.json -w '%{http_code}')
+            code=$(get "$u" -H 'Accept: application/json' -o /tmp/r.json -w '%{http_code}')
             printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/r.json)" >> "$OUT"
-            jq -c 'if type=="object" then {keys:(keys), n:(.results|length?), first:(.results[0]? // .channels[0]? // empty | if type=="object" then {id,title,name,is_livestream,video_url,slug,url} else . end)} else {type:type, n:length} end' /tmp/r.json 2>/dev/null | head -c 900 >> "$OUT"
+            jq -c 'if type=="object" then {keys:(keys), n:(.results|length?), first:(.results[0]? // empty | if type=="object" then {id,title,is_livestream,video_url,author:(.author.name)} else . end)} else {type:type,n:length,first:(.[0]? // empty)} end' /tmp/r.json 2>/dev/null | head -c 700 >> "$OUT"
+            head -c 200 /tmp/r.json >> "$OUT"; echo >> "$OUT"
           done
       - name: Commit results
         if: always()
