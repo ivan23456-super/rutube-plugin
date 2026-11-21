@@ -13,34 +13,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Probe channel playlist endpoint
+      - name: Find playlist endpoint in JS bundles
         run: |
           set -u
           set +e
           OUT=probe-results.md
-          echo "# probe10 $(date -u)" > "$OUT"
+          echo "# probe11 $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
           get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
-          get "https://rutube.ru/channel/5223991/playlists/" -o /tmp/pl.html
+          get "https://rutube.ru/channel/5223991/playlists/" -o /tmp/pl.html -w 'html http=%{http_code} bytes=%{size_download}\n' >> "$OUT"
+          echo "queries-occurrences: $(grep -c queries /tmp/pl.html)" >> "$OUT"
+          echo '--- window around first queries:' >> "$OUT"
+          grep -oE 'queries.{0,300}' /tmp/pl.html | head -2 >> "$OUT"
 
-          echo '## api/playlist paths in html' >> "$OUT"
-          grep -oE 'api[^"\\]{0,80}playlist[^"\\]{0,60}' /tmp/pl.html | sort -u | head -20 >> "$OUT"
+          echo '## script bundles' >> "$OUT"
+          grep -oE 'src="https://static.rtbcdn.ru/[^"]+\.js[^"]*"' /tmp/pl.html | sed -E 's/src="//; s/"$//' | sort -u > /tmp/js.txt
+          wc -l < /tmp/js.txt >> "$OUT"
+          i=0
+          while read -r url; do
+            i=$((i+1))
+            [ $i -gt 25 ] && break
+            get "$url" -o /tmp/b.js
+            hits=$(grep -hoE '(https://rutube\.ru)?/(api|pangolin)/[a-zA-Z0-9/_.-]*playlist[a-zA-Z0-9/_.-]*' /tmp/b.js | sort -u | head -5)
+            if [ -n "$hits" ]; then
+              echo "- $url" >> "$OUT"
+              echo "$hits" >> "$OUT"
+            fi
+          done < /tmp/js.txt
 
-          echo '## queries block' >> "$OUT"
-          grep -oE '\\"queries\\":\{.{0,2500}' /tmp/pl.html | head -c 2500 >> "$OUT"
-          echo >> "$OUT"
-
-          echo '## query names' >> "$OUT"
-          grep -oE '[a-zA-Z]{4,40}\(\\\[' /tmp/pl.html | sort -u | head -40 >> "$OUT"
-
-          echo '## snippets around getPlaylist' >> "$OUT"
-          grep -oiE '.{40}getplaylist.{200}' /tmp/pl.html | head -4 >> "$OUT"
-
-          echo '## playlist object sample' >> "$OUT"
-          grep -oE '\{[^{}]{0,240}video_count[^{}]{0,240}\}' /tmp/pl.html | head -2 >> "$OUT"
-
-          echo '## channel page: playlists link + counts' >> "$OUT"
-          grep -oE 'channel/5223991/playlists/[^"]{0,40}' /tmp/pl.html | head -3 >> "$OUT"
+          echo '## playlist query names in bundles' >> "$OUT"
+          i=0
+          while read -r url; do
+            i=$((i+1))
+            [ $i -gt 25 ] && break
+            get "$url" -o /tmp/b.js
+            grep -hoE '[a-zA-Z]{6,40}Playlist[a-zA-Z]{0,20}' /tmp/b.js | sort -u | head -5
+          done < /tmp/js.txt | sort -u | head -30 >> "$OUT"
 
       - name: Commit results
         if: always()
@@ -48,6 +56,6 @@ jobs:
           git config user.name probe-bot
           git config user.email probe-bot@users.noreply.github.com
           git add probe-results.md
-          git commit -m "probe: playlist endpoint" || exit 0
+          git commit -m "probe: js bundles" || exit 0
           git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
