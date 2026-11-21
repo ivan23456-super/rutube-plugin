@@ -24,7 +24,9 @@ jobs:
         run: |
           set +e
           ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key" > /tmp/g1.log 2>&1
-          echo "genkey exit=$?"
+          g1=$?
+          echo "::error::genkey exit=$g1"
+          tail -25 /tmp/g1.log | while IFS= read -r line; do echo "::error::g1 $line"; done
           ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key" > /tmp/g2.log 2>&1
           code=$?
           echo "index exit=$code"
