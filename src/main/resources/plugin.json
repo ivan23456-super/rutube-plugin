@@ -1,13 +1,13 @@
 {
   "pluginId": "org.pipepipe.rutube",
   "name": "RuTube",
-  "versionCode": 4,
-  "versionName": "1.0.3",
+  "versionCode": 5,
+  "versionName": "1.0.4",
   "apiVersion": "1.0",
   "author": "ivan23456-super",
   "entryClass": "org.pipepipe.rutube.RuTubePlugin",
   "issueUrl": "https://github.com/ivan23456-super/rutube-plugin/issues",
-  "description": "RuTube video hosting: videos, live streams, Shorts, channels with videos/Shorts/live/playlists sections, playlists, search and comments.",
+  "description": "RuTube video hosting: videos, live streams, Shorts, channels with videos/Shorts/live/playlists sections, TV channels, playlists, search and comments. AI-generated plugin.",
   "icon": "icon.png",
   "theme": {
     "light": "#E60000",
