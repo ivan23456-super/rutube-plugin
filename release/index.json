@@ -10,8 +10,8 @@
       "apiVersion": "1.0",
       "author": "ivan23456-super",
       "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-2.ppp",
-      "sha256": "734a51212a0a8371b88fa2dd3ebbc5ba8da95ec21c0396553e3a24780b50d843",
-      "signature": "bpfUxmS0OHDKx5A6yw3IRtbNL5+pIPeyzUoHj3ykQylTfmPHLMdoeqAqf6K6tkUI7q11+ykJytX+AagsD+K5Dg==",
+      "sha256": "96210d119a1c9031283eb5b3792e5c45ebd8f1a23cb53bc435fabc294dfa685a",
+      "signature": "iNzRLo0ZEkLQDgdUN4RwXo0Mo1zPvDhK32UdYMD2fjlp2WZahNKQw3CyLzSDd6iImH+WGkectH9fFQw88rXFDw==",
       "publicKey": "DLCC7suGGj0xX5WwB/zTTjCFs+3JJV8jWaBWGKb52es=",
       "description": "RuTube video hosting: videos, live streams, Shorts, channels, playlists, search and comments.",
       "nsfw": false
