@@ -53,6 +53,19 @@ jobs:
           jq --arg u "$url" '.plugins = [(.plugins[0] | .package = $u)]' \
             build/repo/index.json > release/index.json
           cat release/index.json
+      - name: Store the package for external signing
+        if: env.SIGNED == '0' && github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts
+          rm -f ci-artifacts/*.ppp
+          cp build/repo/*.ppp ci-artifacts/
+          git config user.name "build-bot"
+          git config user.email "build-bot@users.noreply.github.com"
+          git add -f ci-artifacts
+          git commit -m "build: package for signing" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Commit the release
         if: env.SIGNED == '1'
         run: |
