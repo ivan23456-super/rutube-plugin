@@ -112,41 +112,26 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
     }
 
     private void extractHlsUrl() {
-        final JsonObject balancer =
-                RuTubeParsingHelper.getObject(options, "video_balancer");
-        if (balancer != null) {
-            String url = RuTubeParsingHelper.getString(balancer, "default");
-            if (url.isEmpty()) {
-                url = RuTubeParsingHelper.getString(balancer, "m3u8");
-            }
-            if (!url.isEmpty()) {
+        // video_balancer holds a single URL for videos ({@code default}/{@code m3u8}),
+        // live streams keep their playlists under live_streams. Both are walked
+        // generically because the shape differs between VOD, live shows and TV
+        // channels (strings, objects or arrays).
+        final List<String> urls = new ArrayList<>();
+        RuTubeParsingHelper.collectHlsUrls(options.get("video_balancer"), urls);
+        if (urls.isEmpty()) {
+            RuTubeParsingHelper.collectHlsUrls(options.get("live_streams"), urls);
+        }
+        if (urls.isEmpty()) {
+            RuTubeParsingHelper.collectHlsUrls(options.get("hls"), urls);
+        }
+        for (final String url : urls) {
+            if (url.contains(".m3u8")) {
                 hlsUrl = url;
                 return;
             }
         }
-        // Live streams: live_streams.hls.*.url (nested, shape varies).
-        final JsonObject liveStreams =
-                RuTubeParsingHelper.getObject(options, "live_streams");
-        final JsonObject hls = RuTubeParsingHelper.getObject(liveStreams, "hls");
-        final List<String> liveUrls = new ArrayList<>();
-        collectUrls(hls, liveUrls);
-        if (!liveUrls.isEmpty()) {
-            hlsUrl = liveUrls.get(0);
-        }
-    }
-
-    private static void collectUrls(@Nullable final JsonObject json,
-                                    @Nonnull final List<String> urls) {
-        if (json == null) {
-            return;
-        }
-        for (final String key : json.keySet()) {
-            final Object value = json.get(key);
-            if (value instanceof String && key.equals("url")) {
-                urls.add((String) value);
-            } else if (value instanceof JsonObject) {
-                collectUrls((JsonObject) value, urls);
-            }
+        if (!urls.isEmpty()) {
+            hlsUrl = urls.get(0);
         }
     }
 
@@ -184,18 +169,45 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
     }
 
     private void extractVideoStreams() throws IOException, ExtractionException {
-        if (streamsExtracted || hlsUrl.isEmpty()) {
-            streamsExtracted = true;
+        if (streamsExtracted) {
             return;
         }
         streamsExtracted = true;
-        final String masterPlaylist;
+        if (hlsUrl.isEmpty()) {
+            String live = String.valueOf(options.get("live_streams"));
+            if (live.length() > 300) {
+                live = live.substring(0, 300) + "…";
+            }
+            throw new ExtractionException("RuTube не вернул ссылку на поток. Поля ответа: "
+                    + RuTubeParsingHelper.keysOf(options) + " (live_streams=" + live + ")");
+        }
+        String masterPlaylist = null;
         try {
             masterPlaylist = RuTubeParsingHelper.fetchText(getDownloader(), hlsUrl);
         } catch (final Exception ignored) {
-            // The HLS URL itself is still usable for playback.
-            return;
+            // Fall through: the HLS URL itself is still usable for playback.
         }
+        if (masterPlaylist != null) {
+            parseVariants(masterPlaylist);
+        }
+        if (videoStreams.isEmpty()) {
+            // Live channels often serve a plain media playlist (no
+            // EXT-X-STREAM-INF variants) or the master playlist is not fetchable;
+            // hand the HLS URL to the player, it can pick the variant itself.
+            videoStreams.add(new VideoStream.Builder()
+                    .setId("hls")
+                    .setContent(hlsUrl, true)
+                    .setIsVideoOnly(false)
+                    .setResolution("")
+                    .setMediaFormat(MediaFormat.MPEG_4)
+                    .setDeliveryMethod(DeliveryMethod.HLS)
+                    .setBitrate(0)
+                    .setRequestHeaders(RuTubeParsingHelper.mediaHeaders())
+                    .build());
+        }
+    }
+
+    private void parseVariants(@Nonnull final String masterPlaylist) {
         final Set<String> seenResolutions = new HashSet<>();
         final String[] lines = masterPlaylist.split("\n");
         for (int i = 0; i < lines.length; i++) {
@@ -215,14 +227,11 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
                 continue;
             }
             final Matcher resolutionMatcher = RESOLUTION_PATTERN.matcher(line);
-            if (!resolutionMatcher.find()) {
-                continue;
-            }
-            final int width = Integer.parseInt(resolutionMatcher.group(1));
-            final int height = Integer.parseInt(resolutionMatcher.group(2));
-            if (!seenResolutions.add(width + "x" + height)) {
-                // RuTube lists every resolution twice (two CDNs); keep one.
-                continue;
+            int width = 0;
+            int height = 0;
+            if (resolutionMatcher.find()) {
+                width = Integer.parseInt(resolutionMatcher.group(1));
+                height = Integer.parseInt(resolutionMatcher.group(2));
             }
             final Matcher bandwidthMatcher = BANDWIDTH_PATTERN.matcher(line);
             final int bitrate = bandwidthMatcher.find()
@@ -230,22 +239,29 @@ public final class RuTubeStreamExtractor extends StreamExtractor {
             final Matcher frameRateMatcher = FRAME_RATE_PATTERN.matcher(line);
             final int fps = frameRateMatcher.find()
                     ? (int) Math.round(Double.parseDouble(frameRateMatcher.group(1))) : 0;
+            // RuTube lists every variant twice (two CDNs); keep one per quality.
+            final String qualityKey = height > 0 ? width + "x" + height
+                    : "bandwidth-" + bitrate;
+            if (!seenResolutions.add(qualityKey)) {
+                continue;
+            }
             try {
                 variantUrl = new URL(new URL(hlsUrl), variantUrl).toString();
             } catch (final Exception ignored) {
                 // keep the raw URL
             }
             videoStreams.add(new VideoStream.Builder()
-                    .setId(width + "x" + height + "-" + bitrate)
+                    .setId(qualityKey + "-" + bitrate)
                     .setContent(variantUrl, true)
                     .setIsVideoOnly(false)
-                    .setResolution(height + "p")
+                    .setResolution(height > 0 ? height + "p" : "")
                     .setMediaFormat(MediaFormat.MPEG_4)
                     .setDeliveryMethod(DeliveryMethod.HLS)
                     .setBitrate(bitrate)
                     .setWidth(width)
                     .setHeight(height)
                     .setFps(fps)
+                    .setRequestHeaders(RuTubeParsingHelper.mediaHeaders())
                     .build());
         }
     }

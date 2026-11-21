@@ -20,10 +20,10 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Search over videos, channels, playlists and Shorts. The search URL (with the
- * selected content filter baked in) is built by
- * {@link org.pipepipe.rutube.linkHandler.RuTubeSearchQueryHandlerFactory};
- * this extractor only fetches and parses the paginated results.
+ * Search over videos, channels and Shorts. The search URL (with the selected
+ * content filter baked in) is built by
+ * {@link org.pipepipe.rutube.linkHandler.RuTubeSearchQueryHandlerFactory}; this
+ * extractor only fetches and parses the paginated results.
  */
 public final class RuTubeSearchExtractor extends SearchExtractor {
 
@@ -46,7 +46,8 @@ public final class RuTubeSearchExtractor extends SearchExtractor {
         if (page == null || Utils.isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
         }
-        final JsonObject json = RuTubeParsingHelper.fetchJson(getDownloader(), page.getUrl());
+        final JsonObject json = RuTubeParsingHelper.fetchJson(getDownloader(),
+                RuTubeParsingHelper.httpsify(page.getUrl()));
         final MultiInfoItemsCollector collector =
                 new MultiInfoItemsCollector(getServiceId());
 
@@ -59,22 +60,28 @@ public final class RuTubeSearchExtractor extends SearchExtractor {
                 }
                 final JsonObject result = (JsonObject) item;
                 final String itemType = RuTubeParsingHelper.getString(result, "content_type");
+                if ("ad".equals(itemType)) {
+                    continue;
+                }
                 if (RuTubeFilters.CONTENT_CHANNELS.equals(contentType)) {
-                    collector.commit(new RuTubeChannelInfoItemExtractor(result));
-                } else if (RuTubeFilters.CONTENT_PLAYLISTS.equals(contentType)) {
-                    if ("playlist".equals(itemType)) {
-                        collector.commit(new RuTubePlaylistInfoItemExtractor(result));
+                    if (!RuTubeParsingHelper.getString(result, "name").isEmpty()) {
+                        collector.commit(new RuTubeChannelInfoItemExtractor(result));
                     }
+                } else if ("playlist".equals(itemType)) {
+                    // Videos and playlists share one RuTube endpoint; playlists are
+                    // kept when they show up.
+                    collector.commit(new RuTubePlaylistInfoItemExtractor(result));
+                } else if (RuTubeParsingHelper.getString(result, "title").isEmpty()) {
+                    // Cards without a title are not playable items.
+                    continue;
                 } else {
-                    // Videos and Shorts: skip ads and playlists.
-                    if (!"ad".equals(itemType) && !"playlist".equals(itemType)) {
-                        collector.commit(new RuTubeStreamInfoItemExtractor(result));
-                    }
+                    collector.commit(new RuTubeStreamInfoItemExtractor(result));
                 }
             }
         }
 
-        final String next = RuTubeParsingHelper.getString(json, "next");
+        final String next = RuTubeParsingHelper.httpsify(
+                RuTubeParsingHelper.getString(json, "next"));
         final Page nextPage = next.isEmpty() ? null : new Page(next);
         return new InfoItemsPage<>(collector, nextPage);
     }

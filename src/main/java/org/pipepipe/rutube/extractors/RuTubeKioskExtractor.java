@@ -34,7 +34,7 @@ public final class RuTubeKioskExtractor extends KioskExtractor<StreamInfoItem> {
     @Nonnull
     @Override
     public String getName() throws ParsingException {
-        return "Trending";
+        return "В трендах";
     }
 
     @Override
@@ -57,21 +57,27 @@ public final class RuTubeKioskExtractor extends KioskExtractor<StreamInfoItem> {
         if (page == null || Utils.isNullOrEmpty(page.getUrl())) {
             throw new IllegalArgumentException("Page doesn't contain an URL");
         }
-        final JsonObject json = RuTubeParsingHelper.fetchJson(getDownloader(), page.getUrl());
+        final JsonObject json = RuTubeParsingHelper.fetchJson(getDownloader(),
+                RuTubeParsingHelper.httpsify(page.getUrl()));
         final StreamInfoItemsCollector collector =
                 new StreamInfoItemsCollector(getServiceId());
         final JsonArray results = RuTubeParsingHelper.getArray(json, "results");
         if (results != null) {
             for (final Object item : results) {
-                if (item instanceof JsonObject) {
-                    final JsonObject result = (JsonObject) item;
-                    if (!"ad".equals(RuTubeParsingHelper.getString(result, "content_type"))) {
-                        collector.commit(new RuTubeStreamInfoItemExtractor(result));
-                    }
+                if (!(item instanceof JsonObject)) {
+                    continue;
                 }
+                final JsonObject result = (JsonObject) item;
+                if ("ad".equals(RuTubeParsingHelper.getString(result, "content_type"))
+                        || RuTubeParsingHelper.getString(result, "id").isEmpty()
+                        || RuTubeParsingHelper.getString(result, "title").isEmpty()) {
+                    continue;
+                }
+                collector.commit(new RuTubeStreamInfoItemExtractor(result));
             }
         }
-        final String next = RuTubeParsingHelper.getString(json, "next");
+        final String next = RuTubeParsingHelper.httpsify(
+                RuTubeParsingHelper.getString(json, "next"));
         final Page nextPage = next.isEmpty() ? null : new Page(next);
         return new InfoItemsPage<>(collector, nextPage);
     }

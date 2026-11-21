@@ -11,9 +11,18 @@ import java.net.URL;
 import java.util.List;
 
 /**
- * Builds the RuTube search API URLs. The content filter selects the endpoint:
- * videos/playlists use the pangolin backend, channels use the combined cards
- * endpoint and Shorts use the shorts endpoint.
+ * Builds the RuTube search API URLs.
+ *
+ * <ul>
+ *   <li>videos and playlists inside the video list use the pangolin backend;</li>
+ *   <li>channels use the combined cards endpoint;</li>
+ *   <li>Shorts use the shorts endpoint.</li>
+ * </ul>
+ *
+ * <p>Date and duration filters are appended to every endpoint; RuTube ignores the
+ * ones an endpoint does not support and returns HTTP 400 for unknown values, so
+ * the filter items only ever carry values the API accepts (see
+ * {@link RuTubeFilters}).</p>
  */
 public final class RuTubeSearchQueryHandlerFactory extends SearchQueryHandlerFactory {
 
@@ -54,7 +63,8 @@ public final class RuTubeSearchQueryHandlerFactory extends SearchQueryHandlerFac
             case RuTubeFilters.CONTENT_CHANNELS:
                 return RuTubeParsingHelper.SEARCH_CHANNELS_API
                         + "?query=" + encodedQuery
-                        + "&page=1&fields=video_count,is_official&content_type=channel"
+                        + "&page=1&per_page=" + RuTubeParsingHelper.ITEMS_PER_PAGE
+                        + "&fields=video_count,is_official&content_type=channel"
                         + filterQuery;
             case RuTubeFilters.CONTENT_SHORTS:
                 return RuTubeParsingHelper.SEARCH_SHORTS_API
@@ -62,11 +72,11 @@ public final class RuTubeSearchQueryHandlerFactory extends SearchQueryHandlerFac
                         + "&page=1&per_page=" + RuTubeParsingHelper.ITEMS_PER_PAGE
                         + filterQuery;
             case RuTubeFilters.CONTENT_VIDEOS:
-            case RuTubeFilters.CONTENT_PLAYLISTS:
             default:
                 return RuTubeParsingHelper.SEARCH_VIDEOS_API
                         + "?query=" + encodedQuery
-                        + "&page=1"
+                        + "&page=1&per_page=" + RuTubeParsingHelper.ITEMS_PER_PAGE
+                        + "&client=wdp"
                         + filterQuery;
         }
     }
