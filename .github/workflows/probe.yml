@@ -16,6 +16,8 @@ jobs:
       - name: Probe API round 3
         run: |
           set -u
+          exec 2>>probe-trace.log
+          set -x
           OUT=probe-results.md
           echo "# probe3 $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
@@ -62,10 +64,11 @@ jobs:
           { echo "bytes=$(wc -c </tmp/s.html)"; grep -o 'video_playlist[^"]\{0,40\}' /tmp/s.html | head -3; grep -o 'order_by[^",]\{0,40\}' /tmp/s.html | head -3; grep -o 'created[^",]\{0,30\}' /tmp/s.html | head -3; } >> "$OUT"
 
       - name: Commit results
+        if: always()
         run: |
           git config user.name probe-bot
           git config user.email probe-bot@users.noreply.github.com
-          git add probe-results.md
+          git add probe-results.md probe-trace.log
           git commit -m "probe: round 3"
           git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
