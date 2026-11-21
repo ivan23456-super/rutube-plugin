@@ -85,11 +85,18 @@ public final class RuTubeChannelTabExtractor extends ChannelTabExtractor {
         final MultiInfoItemsCollector collector =
                 new MultiInfoItemsCollector(getServiceId());
         final JsonArray results = RuTubeParsingHelper.getArray(json, "results");
+        final boolean liveTab = ChannelTabs.LIVESTREAMS.equals(getTab());
         int itemCount = 0;
         if (results != null) {
             for (final Object item : results) {
                 if (item instanceof JsonObject) {
                     itemCount++;
+                    if (liveTab && RuTubeParsingHelper.isFinishedBroadcast(
+                            (JsonObject) item)) {
+                        // RuTube keeps finished broadcasts in the live list;
+                        // they cannot be played, so they do not belong here.
+                        continue;
+                    }
                     if (isPlaylistsTab()) {
                         collector.commit(
                                 new RuTubePlaylistInfoItemExtractor((JsonObject) item));
