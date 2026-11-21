@@ -1,0 +1,43 @@
++ OUT=probe-results.md
+++ date -u
++ echo '# probe3 Sat Nov 21 08:13:24 UTC 2026'
++ UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
++ q=%D0%BA%D0%BE%D1%82
++ P=https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist
++ echo -e '\n## ordering: created_ts of first 3 + hits'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' default
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' order_by=created_ts_down
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_down'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_down'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' order_by=created_ts_up
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_up'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=created_ts_up'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' order_by=hits
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=hits'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=hits'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' sort=created
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=created'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=created'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' sort=hits
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=hits'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&sort=hits'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
++ for variant in '' 'order_by=created_ts_down' 'order_by=created_ts_up' 'order_by=hits' 'sort=created' 'sort=hits' 'order_by=date'
++ printf '\n- %s\n' order_by=date
++ get 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=date'
++ curl -sS -L --max-time 25 -A 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query=%D0%BA%D0%BE%D1%82&page=1&order_by=date'
++ jq -c '[.results[]|select(.content_type=="video")|{c:.created_ts,h:.hits}][:3]'
+jq: error (at <stdin>:0): Cannot iterate over null (null)
