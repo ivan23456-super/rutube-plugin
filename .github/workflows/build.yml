@@ -1,0 +1,79 @@
+name: Build package
+
+# Builds the .ppp. When the PLUGIN_SIGNING_KEY secret is set, the package is
+# signed with the real key and published to release/ (that is what users
+# install); otherwise the build only validates that the plugin compiles, dexes
+# and produces a valid index, with a throwaway key.
+on:
+  workflow_dispatch:
+  push:
+    paths: ['src/**', 'build.gradle', 'gradle.properties']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android build tools
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;37.0.0" "platforms;android-36"
+      - name: Build and index
+        env:
+          SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "${SIGNING_KEY:-}" ]; then
+            printf '%s' "$SIGNING_KEY" > "$RUNNER_TEMP/signing.key"
+            ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/signing.key"
+            echo "SIGNED=1" >> "$GITHUB_ENV"
+          else
+            ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key"
+            ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key"
+            echo "SIGNED=0" >> "$GITHUB_ENV"
+            echo "::warning::PLUGIN_SIGNING_KEY secret is not set, the package is signed with a throwaway key"
+          fi
+      - name: Publish signed package to release/
+        if: env.SIGNED == '1'
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          rm -f release/*.ppp
+          cp build/repo/*.ppp release/
+          pkg=$(basename "$(ls build/repo/*.ppp | head -1)")
+          url="https://raw.githubusercontent.com/${{ github.repository }}/main/release/${pkg}"
+          jq --arg u "$url" '.plugins = [(.plugins[0] | .package = $u)]' \
+            build/repo/index.json > release/index.json
+          cat release/index.json
+      - name: Store the package for external signing
+        # Committing binaries on every source change would be noise; a manual
+        # run is requested by committing an empty REQUEST_PACKAGE file.
+        if: env.SIGNED == '0' && hashFiles('REQUEST_PACKAGE') != ''
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts
+          rm -f ci-artifacts/*.ppp
+          cp build/repo/*.ppp ci-artifacts/
+          git config user.name "build-bot"
+          git config user.email "build-bot@users.noreply.github.com"
+          git add -f ci-artifacts
+          git commit -m "build: package for signing" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Commit the release
+        if: env.SIGNED == '1'
+        run: |
+          git config user.name "build-bot"
+          git config user.email "build-bot@users.noreply.github.com"
+          git add release
+          git commit -m "release: $(jq -r '.plugins[0].versionName' release/index.json)" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"

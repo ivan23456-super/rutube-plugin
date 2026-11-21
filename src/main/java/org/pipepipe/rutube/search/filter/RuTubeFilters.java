@@ -6,16 +6,31 @@ import org.schabi.newpipe.extractor.search.filter.FilterItem;
 import org.schabi.newpipe.extractor.search.filter.SearchFiltersBase;
 
 /**
- * Search filters mirroring the RuTube search page: content type
- * (videos/channels/playlists/Shorts), publication date, duration and ordering.
- * The query fragments produced here are appended to the search API URLs by
- * {@link org.pipepipe.rutube.linkHandler.RuTubeSearchQueryHandlerFactory}.
+ * Search filters mirroring the RuTube search page.
+ *
+ * <p>Only the filters the RuTube API actually understands are exposed:</p>
+ * <ul>
+ *   <li>content type: videos, channels, Shorts (RuTube does not search playlists);</li>
+ *   <li>publication date: {@code created=day|week|month|year};</li>
+ *   <li>duration: {@code duration=short|medium|long|movie}.</li>
+ * </ul>
+ *
+ * <p>Two details matter for the API:</p>
+ * <ul>
+ *   <li>the "all"/"any" entries must not send anything — RuTube answers
+ *   {@code created=all-time} and {@code duration=any} with HTTP 400, which the app
+ *   shows as "no results";</li>
+ *   <li>ordering is not supported by the search backend ({@code order_by=...} is
+ *   accepted but ignored, other spellings return HTTP 400), so no sort group is
+ *   offered instead of a control that does nothing.</li>
+ * </ul>
  */
 public final class RuTubeFilters extends SearchFiltersBase {
 
+    /** Marker kept in sync with the filter names used by the search handler. */
+
     public static final String CONTENT_VIDEOS = "videos";
     public static final String CONTENT_CHANNELS = "channels";
-    public static final String CONTENT_PLAYLISTS = "playlists";
     public static final String CONTENT_SHORTS = "shorts";
 
     public RuTubeFilters() {
@@ -26,15 +41,22 @@ public final class RuTubeFilters extends SearchFiltersBase {
     @Override
     public String evaluateSelectedFilters(final String searchString) {
         final StringBuilder query = new StringBuilder();
-        if (selectedSortFilter != null) {
-            for (final FilterItem item : selectedSortFilter) {
-                if (item instanceof RuTubeFilterItem) {
-                    final String data = ((RuTubeFilterItem) item).getQueryData();
-                    if (data != null && !data.isEmpty()) {
-                        query.append('&').append(data);
-                    }
-                }
+        if (selectedSortFilter == null) {
+            return "";
+        }
+        for (final FilterItem item : selectedSortFilter) {
+            if (!(item instanceof RuTubeFilterItem)) {
+                continue;
             }
+            final String data = ((RuTubeFilterItem) item).getQueryData();
+            if (data == null || data.isEmpty()) {
+                // "all" / "any": nothing to send, the API rejects those values.
+                continue;
+            }
+            if (query.indexOf(data) >= 0) {
+                continue;
+            }
+            query.append('&').append(data);
         }
         return query.toString();
     }
@@ -42,13 +64,11 @@ public final class RuTubeFilters extends SearchFiltersBase {
     @Override
     protected void init() {
         // Content filters: the kind of content selects the search endpoint.
-        final int contentVideos = builder.addSortItem(
+        final int contentVideos = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_VIDEOS, ""));
-        final int contentChannels = builder.addSortItem(
+        final int contentChannels = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_CHANNELS, ""));
-        final int contentPlaylists = builder.addSortItem(
-                new RuTubeFilterItem(CONTENT_PLAYLISTS, ""));
-        final int contentShorts = builder.addSortItem(
+        final int contentShorts = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_SHORTS, ""));
 
         this.defaultContentFilterId = contentVideos;
@@ -56,13 +76,12 @@ public final class RuTubeFilters extends SearchFiltersBase {
         addContentFilter(builder.createSortGroup(null, true, new FilterItem[]{
                 builder.getFilterForId(contentVideos),
                 builder.getFilterForId(contentChannels),
-                builder.getFilterForId(contentPlaylists),
                 builder.getFilterForId(contentShorts),
         }));
 
-        // Publication date (created=...).
+        // Publication date (created=...). Values are validated by RuTube.
         final int createdAll = builder.addSortItem(
-                new RuTubeFilterItem("all", "created=all-time"));
+                new RuTubeFilterItem("all", ""));
         final int createdDay = builder.addSortItem(
                 new RuTubeFilterItem("day", "created=day"));
         final int createdWeek = builder.addSortItem(
@@ -74,7 +93,7 @@ public final class RuTubeFilters extends SearchFiltersBase {
 
         // Duration (duration=...).
         final int durationAny = builder.addSortItem(
-                new RuTubeFilterItem("any", "duration=any"));
+                new RuTubeFilterItem("any", ""));
         final int durationShort = builder.addSortItem(
                 new RuTubeFilterItem("short", "duration=short"));
         final int durationMedium = builder.addSortItem(
@@ -83,16 +102,6 @@ public final class RuTubeFilters extends SearchFiltersBase {
                 new RuTubeFilterItem("long", "duration=long"));
         final int durationMovie = builder.addSortItem(
                 new RuTubeFilterItem("movie", "duration=movie"));
-
-        // Ordering (order_by=...). Only values accepted by the API are used.
-        final int orderRelevance = builder.addSortItem(
-                new RuTubeFilterItem("relevance", ""));
-        final int orderDateNew = builder.addSortItem(
-                new RuTubeFilterItem("date_new", "order_by=created_ts_down"));
-        final int orderDateOld = builder.addSortItem(
-                new RuTubeFilterItem("date_old", "order_by=created_ts_up"));
-        final int orderViews = builder.addSortItem(
-                new RuTubeFilterItem("views", "order_by=hits"));
 
         final Filter allSortFilters = new Filter.Builder(new FilterGroup[]{
                 builder.createSortGroup("created", true, new FilterItem[]{
@@ -109,18 +118,11 @@ public final class RuTubeFilters extends SearchFiltersBase {
                         builder.getFilterForId(durationLong),
                         builder.getFilterForId(durationMovie),
                 }),
-                builder.createSortGroup("sortby", true, new FilterItem[]{
-                        builder.getFilterForId(orderRelevance),
-                        builder.getFilterForId(orderDateNew),
-                        builder.getFilterForId(orderDateOld),
-                        builder.getFilterForId(orderViews),
-                }),
         }).build();
 
         addContentFilterSortVariant(-1, allSortFilters);
         addContentFilterSortVariant(contentVideos, allSortFilters);
         addContentFilterSortVariant(contentChannels, allSortFilters);
-        addContentFilterSortVariant(contentPlaylists, allSortFilters);
         addContentFilterSortVariant(contentShorts, allSortFilters);
     }
 

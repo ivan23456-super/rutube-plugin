@@ -18,7 +18,11 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.annotation.Nonnull;
@@ -83,6 +87,38 @@ public final class RuTubeParsingHelper {
     /** Items per page returned by the RuTube list endpoints. */
     public static final int ITEMS_PER_PAGE = 20;
 
+    /**
+     * Headers the RuTube web player sends with its API requests. RuTube answers
+     * some requests (notably play options of TV channels) with a player stub when
+     * they do not look like they come from the site, so they are sent along with
+     * every API call.
+     */
+    private static final Map<String, List<String>> API_HEADERS;
+
+    /** Headers used for media playlists and other CDN requests. */
+    private static final Map<String, List<String>> MEDIA_HEADERS;
+
+    /** The same headers as plain strings, for the player. */
+    private static final Map<String, String> PLAYER_HEADERS;
+
+    static {
+        API_HEADERS = headers("application/json, text/plain, */*");
+        MEDIA_HEADERS = headers("*/*");
+        final Map<String, String> playerHeaders = new HashMap<>();
+        playerHeaders.put("Referer", BASE_URL + "/");
+        playerHeaders.put("Origin", BASE_URL);
+        PLAYER_HEADERS = Collections.unmodifiableMap(playerHeaders);
+    }
+
+    @Nonnull
+    private static Map<String, List<String>> headers(@Nonnull final String accept) {
+        final Map<String, List<String>> map = new HashMap<>();
+        map.put("Referer", Collections.singletonList(BASE_URL + "/"));
+        map.put("Origin", Collections.singletonList(BASE_URL));
+        map.put("Accept", Collections.singletonList(accept));
+        return Collections.unmodifiableMap(map);
+    }
+
     private static final String[] DATE_PATTERNS = {
             "yyyy-MM-dd'T'HH:mm:ssXXX",
             "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
@@ -108,22 +144,58 @@ public final class RuTubeParsingHelper {
     public static JsonObject fetchJson(@Nonnull final Downloader downloader,
                                        @Nonnull final String url)
             throws IOException, ExtractionException {
-        final Response response = downloader.get(url);
+        return fetchJson(downloader, url, API_HEADERS);
+    }
+
+    /**
+     * Fetches a JSON object with the given headers. RuTube answers some requests
+     * with a player stub ({@code {"detail": {"type": "player_stub"|"blocking_rule"}}})
+     * instead of an error code; those are turned into an {@link ExtractionException}
+     * carrying a human readable reason.
+     */
+    @Nonnull
+    public static JsonObject fetchJson(@Nonnull final Downloader downloader,
+                                       @Nonnull final String url,
+                                       @Nonnull final Map<String, List<String>> headers)
+            throws IOException, ExtractionException {
+        final Response response = downloader.get(url, headers);
         if (response == null || Utils.isBlank(response.responseBody())) {
             throw new ExtractionException("Empty response from " + url);
+        }
+        final String body = response.responseBody();
+        JsonObject json = null;
+        if (body.trim().startsWith("{")) {
+            try {
+                json = JsonParser.object().from(body);
+            } catch (final Exception ignored) {
+                // not JSON after all, handled below
+            }
+        }
+        if (json != null) {
+            final JsonObject detail = getObject(json, "detail");
+            if (detail != null && !getString(detail, "type").isEmpty()) {
+                throw new ExtractionException(describeStub(detail));
+            }
+            return json;
         }
         if (response.responseCode() == 404) {
             throw new ExtractionException("Not found: " + url);
         }
-        try {
-            final JsonObject json = JsonParser.object().from(response.responseBody());
-            if (json == null) {
-                throw new ExtractionException("Could not parse JSON from " + url);
-            }
-            return json;
-        } catch (final Exception e) {
-            throw new ExtractionException("Could not parse JSON from " + url, e);
+        throw new ExtractionException("Could not parse JSON from " + url);
+    }
+
+    @Nonnull
+    private static String describeStub(@Nonnull final JsonObject detail) {
+        final String type = getString(detail, "type");
+        final String name = getString(detail, "name");
+        if ("stream_yet_finished".equals(name)) {
+            return "Трансляция завершена";
         }
+        if ("blocking_rule".equals(type)) {
+            return "RuTube заблокировал это видео для вашего запроса (blocking_rule). "
+                    + "Обычно это гео-ограничение или требование авторизации.";
+        }
+        return "RuTube не отдал видео (" + (name.isEmpty() ? type : name) + ")";
     }
 
     /**
@@ -133,11 +205,86 @@ public final class RuTubeParsingHelper {
     public static String fetchText(@Nonnull final Downloader downloader,
                                    @Nonnull final String url)
             throws IOException, ExtractionException {
-        final Response response = downloader.get(url);
+        return fetchText(downloader, url, MEDIA_HEADERS);
+    }
+
+    @Nonnull
+    public static String fetchText(@Nonnull final Downloader downloader,
+                                   @Nonnull final String url,
+                                   @Nonnull final Map<String, List<String>> headers)
+            throws IOException, ExtractionException {
+        final Response response = downloader.get(url, headers);
         if (response == null || Utils.isBlank(response.responseBody())) {
             throw new ExtractionException("Empty response from " + url);
         }
+        if (response.responseCode() >= 400) {
+            throw new ExtractionException("HTTP " + response.responseCode()
+                    + " from " + url);
+        }
         return response.responseBody();
+    }
+
+    /**
+     * RuTube still returns {@code http://} links for some lists (for example the
+     * shorts search {@code next} URL points at {@code search-backend.rutube.ru}
+     * over plain HTTP), which Android refuses to load. Such links are upgraded to
+     * HTTPS.
+     */
+    /** Headers to give to the player for HLS/CDN requests. */
+    @Nonnull
+    public static Map<String, String> mediaHeaders() {
+        return PLAYER_HEADERS;
+    }
+
+    /** Headers to send along with API requests. */
+    @Nonnull
+    public static Map<String, List<String>> apiHeaders() {
+        return API_HEADERS;
+    }
+
+    @Nonnull
+    public static String httpsify(@Nullable final String url) {
+        if (url == null) {
+            return EMPTY_STRING;
+        }
+        return url.startsWith("http://") ? "https://" + url.substring(7) : url;
+    }
+
+    /**
+     * Returns the URLs of an HLS master playlist found anywhere inside
+     * {@code video_balancer} / {@code live_streams} style JSON: values can be
+     * strings, objects or arrays depending on the kind of stream.
+     */
+    @Nonnull
+    public static List<String> collectHlsUrls(@Nullable final Object node,
+                                              @Nonnull final List<String> urls) {
+        if (node instanceof String) {
+            final String value = ((String) node).trim();
+            if (value.startsWith("http") && !urls.contains(value)) {
+                urls.add(value);
+            }
+        } else if (node instanceof JsonObject) {
+            final JsonObject object = (JsonObject) node;
+            for (final String key : object.keySet()) {
+                collectHlsUrls(object.get(key), urls);
+            }
+        } else if (node instanceof com.grack.nanojson.JsonArray) {
+            final com.grack.nanojson.JsonArray array =
+                    (com.grack.nanojson.JsonArray) node;
+            for (final Object item : array) {
+                collectHlsUrls(item, urls);
+            }
+        }
+        return urls;
+    }
+
+    /** Joins the top level keys of a JSON object, for diagnostics. */
+    @Nonnull
+    public static String keysOf(@Nullable final JsonObject json) {
+        if (json == null) {
+            return "[]";
+        }
+        return String.join(",", json.keySet());
     }
 
     // ------------------------------------------------------------------

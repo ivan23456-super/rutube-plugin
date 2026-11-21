@@ -25,5 +25,17 @@ jobs:
       # Only checks that the plugin builds, dexes and produces a valid index; the key is thrown away.
       - name: Build and index with a throwaway key
         run: |
-          ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key"
-          ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key"
+          set -o pipefail
+          ./gradlew :tools:genKey -PpluginSigningKey="$RUNNER_TEMP/ci.key" 2>&1 | tee /tmp/g1.log
+          ./gradlew :tools:index -PpluginSigningKey="$RUNNER_TEMP/ci.key" 2>&1 | tee /tmp/g2.log
+      - name: Dump build failure
+        if: failure()
+        run: |
+          for f in /tmp/g1.log /tmp/g2.log; do
+            [ -f "$f" ] || continue
+            echo "::group::$f"
+            grep -nE "FAILURE|error:|Caused by|What went wrong|FAILED|Could not|Exception" "$f" | head -40
+            echo "::endgroup::"
+            tail -40 "$f"
+          done
+          df -h / || true
