@@ -62,11 +62,11 @@ public final class RuTubeFilters extends SearchFiltersBase {
     @Override
     protected void init() {
         // Content filters: the kind of content selects the search endpoint.
-        final int contentVideos = builder.addSortItem(
+        final int contentVideos = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_VIDEOS, ""));
-        final int contentChannels = builder.addSortItem(
+        final int contentChannels = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_CHANNELS, ""));
-        final int contentShorts = builder.addSortItem(
+        final int contentShorts = builder.addFilterItem(
                 new RuTubeFilterItem(CONTENT_SHORTS, ""));
 
         this.defaultContentFilterId = contentVideos;
