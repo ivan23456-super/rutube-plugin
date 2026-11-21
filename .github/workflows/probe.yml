@@ -16,6 +16,7 @@ jobs:
       - name: Probe API round 3
         run: |
           set -u
+          set +e
           exec 2>>probe-trace.log
           set -x
           OUT=probe-results.md
