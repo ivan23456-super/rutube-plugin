@@ -1,0 +1,54 @@
+name: Probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/probe.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe filter matrix
+        run: |
+          set -u
+          set +e
+          OUT=probe-results.md
+          echo "# probe7 $(date -u)" > "$OUT"
+          UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
+          q='%D0%BA%D0%BE%D1%82'
+          get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
+          check() {
+            local label="$1" url="$2"
+            printf '\n- %s: ' "$label" >> "$OUT"
+            code=$(get "$url" -o /tmp/b.json -w '%{http_code}')
+            n=$(jq -r '(.results|length?)|tostring' /tmp/b.json 2>/dev/null)
+            printf 'http=%s n=%s\n' "$code" "${n:-?}" >> "$OUT"
+          }
+          S='https://rutube.ru/api/search/shorts?query='"$q"'&page=1&per_page=20'
+          C='https://rutube.ru/api/search/combined/cards/list?query='"$q"'&page=1&per_page=20&fields=video_count,is_official&content_type=channel'
+          check 'shorts base' "$S"
+          check 'shorts created=day' "$S&created=day"
+          check 'shorts created=month' "$S&created=month"
+          check 'shorts duration=short' "$S&duration=short"
+          check 'shorts duration=movie' "$S&duration=movie"
+          check 'shorts created=day&duration=medium' "$S&created=day&duration=medium"
+          check 'channels base' "$C"
+          check 'channels created=day' "$C&created=day"
+          check 'channels duration=short' "$C&duration=short"
+          check 'channels created=week&duration=long' "$C&created=week&duration=long"
+          check 'videos base' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query='"$q"'&page=1&per_page=20&client=wdp'
+          check 'videos created=day&duration=movie' 'https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist?query='"$q"'&page=1&per_page=20&client=wdp&created=day&duration=movie'
+      - name: Commit results
+        if: always()
+        run: |
+          git config user.name probe-bot
+          git config user.email probe-bot@users.noreply.github.com
+          git add probe-results.md
+          git commit -m "probe: filter matrix" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
