@@ -21,9 +21,13 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Channel tabs: videos and Shorts, both served by the channel video list with
- * a different {@code origin__type}. The playlists tab is not supported because
- * RuTube has no public channel-playlists endpoint.
+ * Channel tabs of a RuTube channel:
+ * <ul>
+ *     <li>{@code videos} – uploads ({@code /api/video/person/{id}/}, origin rtb,ifrm,rspa);</li>
+ *     <li>{@code shorts} – Shorts (origin {@code rshorts});</li>
+ *     <li>{@code livestreams} – live streams only (origin {@code rst});</li>
+ *     <li>{@code playlists} – channel playlists ({@code /api/playlist/user/{id}/}).</li>
+ * </ul>
  */
 public final class RuTubeChannelTabExtractor extends ChannelTabExtractor {
 
@@ -40,10 +44,17 @@ public final class RuTubeChannelTabExtractor extends ChannelTabExtractor {
         channelId = RuTubeParsingHelper.resolveChannelId(downloader, getId());
     }
 
+    private boolean isPlaylistsTab() {
+        return ChannelTabs.PLAYLISTS.equals(getTab());
+    }
+
     private String getOriginType() throws ParsingException {
         final String tab = getTab();
         if (ChannelTabs.SHORTS.equals(tab)) {
             return RuTubeParsingHelper.ORIGIN_SHORTS;
+        }
+        if (ChannelTabs.LIVESTREAMS.equals(tab)) {
+            return RuTubeParsingHelper.ORIGIN_LIVE;
         }
         if (ChannelTabs.VIDEOS.equals(tab)) {
             return RuTubeParsingHelper.ORIGIN_VIDEOS;
@@ -55,6 +66,10 @@ public final class RuTubeChannelTabExtractor extends ChannelTabExtractor {
     @Override
     public InfoItemsPage<InfoItem> getInitialPage()
             throws IOException, ExtractionException {
+        if (isPlaylistsTab()) {
+            return getPage(new Page(String.format(
+                    RuTubeParsingHelper.CHANNEL_PLAYLISTS_API, channelId, 1)));
+        }
         return getPage(new Page(String.format(RuTubeParsingHelper.CHANNEL_VIDEOS_API,
                 channelId, 1, getOriginType())));
     }
@@ -70,15 +85,22 @@ public final class RuTubeChannelTabExtractor extends ChannelTabExtractor {
         final MultiInfoItemsCollector collector =
                 new MultiInfoItemsCollector(getServiceId());
         final JsonArray results = RuTubeParsingHelper.getArray(json, "results");
+        int itemCount = 0;
         if (results != null) {
             for (final Object item : results) {
                 if (item instanceof JsonObject) {
-                    collector.commit(
-                            new RuTubeStreamInfoItemExtractor((JsonObject) item));
+                    itemCount++;
+                    if (isPlaylistsTab()) {
+                        collector.commit(
+                                new RuTubePlaylistInfoItemExtractor((JsonObject) item));
+                    } else {
+                        collector.commit(
+                                new RuTubeStreamInfoItemExtractor((JsonObject) item));
+                    }
                 }
             }
         }
-        final String next = RuTubeParsingHelper.getString(json, "next");
+        final String next = RuTubeParsingHelper.nextPageUrl(json, page.getUrl(), itemCount);
         final Page nextPage = next.isEmpty() ? null : new Page(next);
         return new InfoItemsPage<>(collector, nextPage);
     }

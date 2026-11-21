@@ -84,20 +84,27 @@ public final class RuTubeChannelExtractor extends ChannelExtractor {
         return RuTubeParsingHelper.getBoolean(channelInfo, "is_official");
     }
 
+    /**
+     * The sections the RuTube channel page really has: videos, Shorts, live streams
+     * and playlists. Live streams are a video list with {@code origin__type=rst};
+     * playlists come from {@code /api/playlist/user/{id}/}.
+     */
     @Nonnull
     @Override
     public List<ListLinkHandler> getTabs() throws ParsingException {
         return Arrays.asList(
-                RuTubeChannelTabLinkHandlerFactory.getInstance().fromQuery(
-                        getId(),
-                        Collections.singletonList(new FilterItem(
-                                Filter.ITEM_IDENTIFIER_UNKNOWN, ChannelTabs.VIDEOS)),
-                        null, getBaseUrl()),
-                RuTubeChannelTabLinkHandlerFactory.getInstance().fromQuery(
-                        getId(),
-                        Collections.singletonList(new FilterItem(
-                                Filter.ITEM_IDENTIFIER_UNKNOWN, ChannelTabs.SHORTS)),
-                        null, getBaseUrl()));
+                tab(ChannelTabs.VIDEOS),
+                tab(ChannelTabs.SHORTS),
+                tab(ChannelTabs.LIVESTREAMS),
+                tab(ChannelTabs.PLAYLISTS));
+    }
+
+    private ListLinkHandler tab(final String name) throws ParsingException {
+        return RuTubeChannelTabLinkHandlerFactory.getInstance().fromQuery(
+                getId(),
+                Collections.singletonList(new FilterItem(
+                        Filter.ITEM_IDENTIFIER_UNKNOWN, name)),
+                null, getBaseUrl());
     }
 
     @Nonnull

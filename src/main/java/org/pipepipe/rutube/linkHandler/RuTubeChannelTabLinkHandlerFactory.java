@@ -17,8 +17,13 @@ import java.util.regex.Pattern;
 
 /**
  * Accepts RuTube channel tab URLs such as {@code /channel/{id}/videos/},
- * {@code /channel/{id}/shorts/} and {@code /u/{slug}/videos/}.
- * The tab itself is carried in the content filter, as usual for channel tabs.
+ * {@code /channel/{id}/shorts/}, {@code /channel/{id}/playlists/} and
+ * {@code /u/{slug}/videos/}. The tab itself is carried in the content filter,
+ * as usual for channel tabs.
+ *
+ * <p>{@code livestreams} is not a page on rutube.ru (the site shows live streams
+ * inside the channel), but it is a real section of the channel API, so the tab
+ * URL uses the same shape.</p>
  */
 public final class RuTubeChannelTabLinkHandlerFactory extends ListLinkHandlerFactory {
 
@@ -26,7 +31,8 @@ public final class RuTubeChannelTabLinkHandlerFactory extends ListLinkHandlerFac
             new RuTubeChannelTabLinkHandlerFactory();
 
     private static final Pattern TAB_PATTERN = Pattern.compile(
-            "^/(?:channel/(\\d+)|u/([^/]+)|video/person/(\\d+))/(videos|shorts|playlists)/?$");
+            "^/(?:channel/(\\d+)|u/([^/]+)|video/person/(\\d+))/"
+                    + "(videos|shorts|playlists|livestreams)/?$");
 
     private RuTubeChannelTabLinkHandlerFactory() {
     }
@@ -52,7 +58,8 @@ public final class RuTubeChannelTabLinkHandlerFactory extends ListLinkHandlerFac
         }
         final String tab = contentFilter.get(0).getName();
         if (!tab.equals(ChannelTabs.VIDEOS) && !tab.equals(ChannelTabs.SHORTS)
-                && !tab.equals(ChannelTabs.PLAYLISTS)) {
+                && !tab.equals(ChannelTabs.PLAYLISTS)
+                && !tab.equals(ChannelTabs.LIVESTREAMS)) {
             throw new ParsingException("Unsupported channel tab: " + tab);
         }
         return baseUrl + "/channel/" + id + "/" + tab + "/";

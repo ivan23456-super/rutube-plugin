@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -80,12 +82,22 @@ public final class RuTubeParsingHelper {
     public static final String RECOMMENDATION_API =
             API_BASE + "/v2/video/recommendation/main?limit=20&offset=%s";
 
-    /** origin__type values for the channel video list. */
-    public static final String ORIGIN_VIDEOS = "rtb,rst,ifrm,rspa";
+    /**
+     * origin__type values for the channel video list. Live streams carry their own
+     * origin type ({@code rst}) and get a separate channel tab, so they are not
+     * part of the regular video list.
+     */
+    public static final String ORIGIN_VIDEOS = "rtb,ifrm,rspa";
+    /** Live streams only (the livestreams tab of a channel). */
+    public static final String ORIGIN_LIVE = "rst";
     public static final String ORIGIN_SHORTS = "rshorts";
 
     /** Items per page returned by the RuTube list endpoints. */
     public static final int ITEMS_PER_PAGE = 20;
+
+    /** Paginated playlists of a channel ({@code results} = playlist objects). */
+    public static final String CHANNEL_PLAYLISTS_API =
+            API_BASE + "/playlist/user/%s/?page=%s&limit=" + ITEMS_PER_PAGE + "&format=json";
 
     /**
      * Headers the RuTube web player sends with its API requests. RuTube answers
@@ -144,7 +156,7 @@ public final class RuTubeParsingHelper {
     public static JsonObject fetchJson(@Nonnull final Downloader downloader,
                                        @Nonnull final String url)
             throws IOException, ExtractionException {
-        return fetchJson(downloader, url, API_HEADERS);
+        return fetchJson(downloader, url, apiHeaders());
     }
 
     /**
@@ -188,14 +200,74 @@ public final class RuTubeParsingHelper {
     private static String describeStub(@Nonnull final JsonObject detail) {
         final String type = getString(detail, "type");
         final String name = getString(detail, "name");
-        if ("stream_yet_finished".equals(name)) {
+        final String reason = name.isEmpty() ? type : name;
+        if ("stream_yet_finished".equals(reason)) {
             return "Трансляция завершена";
         }
-        if ("blocking_rule".equals(type)) {
-            return "RuTube заблокировал это видео для вашего запроса (blocking_rule). "
-                    + "Обычно это гео-ограничение или требование авторизации.";
+        if (reason.startsWith("subscription")) {
+            return describeSubscription(reason);
         }
-        return "RuTube не отдал видео (" + (name.isEmpty() ? type : name) + ")";
+        if (reason.contains("adult")) {
+            return "Видео доступно только с подтверждённым возрастом 18+: "
+                    + "войдите в аккаунт RuTube (Настройки → Плагины → RuTube), "
+                    + "где возраст уже подтверждён.";
+        }
+        if ("blocking_rule".equals(type) || reason.contains("blocking")
+                || reason.contains("geo")) {
+            return "RuTube не отдаёт это видео для вашего региона "
+                    + "(geo/blocking_rule). Без российского IP или нужной подписки "
+                    + "трансляция недоступна.";
+        }
+        if ("player_stub".equals(type)) {
+            return "RuTube не отдал видео (player_stub: " + reason + ")";
+        }
+        return "RuTube не отдал видео (" + reason + ")";
+    }
+
+    /**
+     * Turns {@code subscription: SPORT} (or a bare subscription stub) into a message
+     * that explains what the user has to do. Subscription streams are only playable
+     * for a signed in account that owns the product, so the hint depends on whether
+     * login cookies are stored.
+     */
+    @Nonnull
+    private static String describeSubscription(@Nonnull final String reason) {
+        final String code = reason.replaceFirst("^subscription:?\\s*", "").trim();
+        final String human = subscriptionName(code);
+        final StringBuilder message = new StringBuilder("Трансляция доступна только по подписке RuTube");
+        if (!human.isEmpty()) {
+            message.append(" «").append(human).append('»');
+        } else if (!code.isEmpty()) {
+            message.append(" (").append(code).append(')');
+        }
+        message.append(". ");
+        if (RuTubeService.getLoginCookieHeader().isEmpty()) {
+            message.append("Войдите в аккаунт RuTube с этой подпиской: "
+                    + "Настройки → Плагины → RuTube → Войти.");
+        } else {
+            message.append("Похоже, эта подписка не активна для аккаунта, "
+                    + "в который вы вошли в плагине.");
+        }
+        return message.toString();
+    }
+
+    @Nonnull
+    private static String subscriptionName(@Nonnull final String code) {
+        switch (code.toLowerCase(Locale.ROOT)) {
+            case "sport":
+                return "Спорт";
+            case "vse-vklyucheno":
+                return "Всё включено";
+            case "premium":
+            case "rutube_premium":
+                return "RUTUBE Premium";
+            case "deti":
+                return "Дети";
+            case "nash":
+                return "Наше";
+            default:
+                return EMPTY_STRING;
+        }
     }
 
     /**
@@ -236,10 +308,19 @@ public final class RuTubeParsingHelper {
         return PLAYER_HEADERS;
     }
 
-    /** Headers to send along with API requests. */
+    /**
+     * Headers to send along with API requests, including the RuTube login cookies
+     * when the user signed in to the plugin (needed for paid/subscription content).
+     */
     @Nonnull
     public static Map<String, List<String>> apiHeaders() {
-        return API_HEADERS;
+        final String cookies = RuTubeService.getLoginCookieHeader();
+        if (cookies.isEmpty()) {
+            return API_HEADERS;
+        }
+        final Map<String, List<String>> map = new HashMap<>(API_HEADERS);
+        map.put("Cookie", Collections.singletonList(cookies));
+        return Collections.unmodifiableMap(map);
     }
 
     @Nonnull
@@ -423,6 +504,37 @@ public final class RuTubeParsingHelper {
     // ------------------------------------------------------------------
     // URLs
     // ------------------------------------------------------------------
+
+    /**
+     * Resolves the URL of the next page of a paginated API result. RuTube usually
+     * returns a ready {@code next} URL; endpoints that only report {@code count}
+     * (for example the channel playlists) get the page parameter incremented.
+     *
+     * @return the next page URL, or an empty string on the last page
+     */
+    @Nonnull
+    public static String nextPageUrl(@Nullable final JsonObject json,
+                                     @Nonnull final String currentUrl,
+                                     final int itemCount) {
+        final String next = getString(json, "next");
+        if (!next.isEmpty()) {
+            return next;
+        }
+        if (itemCount < ITEMS_PER_PAGE) {
+            return EMPTY_STRING;
+        }
+        final Matcher pageMatcher = Pattern.compile("[?&]page=(\\d+)").matcher(currentUrl);
+        if (!pageMatcher.find()) {
+            return EMPTY_STRING;
+        }
+        final long page = Long.parseLong(pageMatcher.group(1));
+        final long count = getLong(json, "count", -1);
+        if (count >= 0 && page * ITEMS_PER_PAGE >= count) {
+            return EMPTY_STRING;
+        }
+        return currentUrl.substring(0, pageMatcher.start(1)) + (page + 1)
+                + currentUrl.substring(pageMatcher.end(1));
+    }
 
     @Nonnull
     public static String buildVideoUrl(@Nonnull final String videoId) {

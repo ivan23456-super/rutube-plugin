@@ -33,23 +33,45 @@ import org.schabi.newpipe.extractor.linkhandler.ListLinkHandlerFactory;
 import org.schabi.newpipe.extractor.linkhandler.SearchQueryHandler;
 import org.schabi.newpipe.extractor.linkhandler.SearchQueryHandlerFactory;
 import org.schabi.newpipe.extractor.playlist.PlaylistExtractor;
+import org.schabi.newpipe.extractor.plugin.PluginLogin;
 import org.schabi.newpipe.extractor.plugin.PluginPreferences;
 import org.schabi.newpipe.extractor.search.SearchExtractor;
 import org.schabi.newpipe.extractor.stream.StreamExtractor;
 import org.schabi.newpipe.extractor.subscription.SubscriptionExtractor;
 import org.schabi.newpipe.extractor.suggestion.SuggestionExtractor;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * RuTube service. The serviceId is assigned by the host and must be passed on unchanged.
  */
 public final class RuTubeService extends StreamingService {
 
-    @SuppressWarnings("unused")
-    private final PluginPreferences preferences;
+    /** Cookie header of a web login made by the user, empty when signed out. */
+    private static volatile String loginCookieHeader = "";
 
     public RuTubeService(final int id, final PluginPreferences preferences) {
         super(id, "RuTube", asList(VIDEO, LIVE, COMMENTS));
-        this.preferences = preferences;
+        updateLoginCookies(preferences.getString(PluginLogin.DEFAULT_KEY));
+        preferences.addChangeListener(key -> {
+            if (PluginLogin.DEFAULT_KEY.equals(key)) {
+                updateLoginCookies(preferences.getString(key));
+            }
+        });
+    }
+
+    private static void updateLoginCookies(@Nullable final String cookies) {
+        loginCookieHeader = cookies == null ? "" : cookies.trim();
+    }
+
+    /**
+     * @return the {@code Cookie} header to send with RuTube requests: the web login
+     * cookies when the user signed in through the plugin settings, otherwise empty
+     */
+    @Nonnull
+    public static String getLoginCookieHeader() {
+        return loginCookieHeader;
     }
 
     @Override
