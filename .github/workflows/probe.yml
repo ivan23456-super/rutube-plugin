@@ -23,28 +23,24 @@ jobs:
           get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
           get "https://rutube.ru/channel/5223991/playlists/" -o /tmp/pl.html
 
-          echo -e '\n## api/playlist paths in html' >> "$OUT"
-          grep -oE 'api(\\?/|/)playlist[a-zA-Z0-9/_?=&.;:-]*' /tmp/pl.html | sort -u | head -20 >> "$OUT"
+          echo '## api/playlist paths in html' >> "$OUT"
+          grep -oE 'api[^"\\]{0,80}playlist[^"\\]{0,60}' /tmp/pl.html | sort -u | head -20 >> "$OUT"
 
-          echo -e '\n## react-query keys' >> "$OUT"
-          grep -oE '[a-zA-Z]{3,40}\(\\+"?\[\\+"?' /tmp/pl.html | sort -u | head -40 >> "$OUT"
-          grep -oE '\\"[a-zA-Z]{4,40}\(\\\[' /tmp/pl.html | sed -E 's/\\"//g' | sort -u | head -40 >> "$OUT"
+          echo '## queries block' >> "$OUT"
+          grep -oE '\\"queries\\":\{.{0,2500}' /tmp/pl.html | head -c 2500 >> "$OUT"
+          echo >> "$OUT"
 
-          echo -e '\n## snippets around getPlaylist' >> "$OUT"
-          grep -oE '.{40}[gG]etPlaylist.{160}' /tmp/pl.html | head -6 >> "$OUT"
-          echo -e '\n## snippets around playlistCount' >> "$OUT"
-          grep -oE '.{20}playlists?Count.{160}' /tmp/pl.html | head -4 >> "$OUT"
+          echo '## query names' >> "$OUT"
+          grep -oE '[a-zA-Z]{4,40}\(\\\[' /tmp/pl.html | sort -u | head -40 >> "$OUT"
 
-          echo -e '\n## playlist objects in state' >> "$OUT"
-          grep -oE '\{[^{}]{0,300}video_count[^{}]{0,300}\}' /tmp/pl.html | head -2 >> "$OUT"
+          echo '## snippets around getPlaylist' >> "$OUT"
+          grep -oiE '.{40}getplaylist.{200}' /tmp/pl.html | head -4 >> "$OUT"
 
-          echo -e '\n## queries block dump' >> "$OUT"
-          python3 - <<'PY' >> "$OUT"
-import re
-html = open('/tmp/pl.html', encoding='utf-8', errors='replace').read()
-i = html.find('"queries"')
-print(html[i:i+1500].replace('\\"', '"') if i >= 0 else 'queries not found')
-PY
+          echo '## playlist object sample' >> "$OUT"
+          grep -oE '\{[^{}]{0,240}video_count[^{}]{0,240}\}' /tmp/pl.html | head -2 >> "$OUT"
+
+          echo '## channel page: playlists link + counts' >> "$OUT"
+          grep -oE 'channel/5223991/playlists/[^"]{0,40}' /tmp/pl.html | head -3 >> "$OUT"
 
       - name: Commit results
         if: always()
