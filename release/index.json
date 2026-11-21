@@ -5,15 +5,15 @@
     {
       "pluginId": "org.pipepipe.rutube",
       "name": "RuTube",
-      "versionCode": 4,
-      "versionName": "1.0.3",
+      "versionCode": 5,
+      "versionName": "1.0.4",
       "apiVersion": "1.0",
       "author": "ivan23456-super",
-      "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-4.ppp",
-      "sha256": "9e9b6550ad295f5c268619b28168b55cbc8b6cb6f1ce67935236931786bbc338",
-      "signature": "Gar1nvddsqqTcFDsM0DYXmuX6Qe0lwpDfJ2qlgXwO7pP7N8ANeEketSfeeKPwSCC8z63+85PSsZShrsNvFdQBA==",
+      "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-5.ppp",
+      "sha256": "0469b8b50244d6570990f9318eeb4459dbb5043a2bc3e67b17336e9986a431c3",
+      "signature": "Rs9lXOFljTFKDtgu1ij8CtEmm6dpOWRANKxywbagyQE4WwRiNlshYfEdWRd5RtWQhrPjM19MKuR4B+rFicyrBw==",
       "publicKey": "DLCC7suGGj0xX5WwB/zTTjCFs+3JJV8jWaBWGKb52es=",
-      "description": "RuTube video hosting: videos, live streams, Shorts, channels with videos/Shorts/live/playlists sections, TV channels, playlists, search and comments.",
+      "description": "RuTube video hosting: videos, live streams, Shorts, channels with videos/Shorts/live/playlists sections, TV channels, playlists, search and comments. AI-generated plugin.",
       "nsfw": false
     }
   ]
