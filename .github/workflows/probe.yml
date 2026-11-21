@@ -13,43 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Probe playlist endpoints
+      - name: Probe login cookies
         run: |
           set -u
           set +e
           OUT=probe-results.md
-          echo "# probe13 $(date -u)" > "$OUT"
+          echo "# probe14 $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
-          get() { curl -sS -L --max-time 25 -A "$UA" "$@"; }
-          CH=5223991
-          show() {
-            local label="$1" url="$2"
-            printf '\n## %s\n%s\n' "$label" "$url" >> "$OUT"
-            code=$(get "$url" -o /tmp/r.json -w '%{http_code}')
-            printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/r.json)" >> "$OUT"
-            jq -c '{count,next,n:(.results|length?),firstKeys:(.results[0]?|keys?)}' /tmp/r.json 2>/dev/null >> "$OUT"
-          }
-          show 'playlist/user' "https://rutube.ru/api/playlist/user/$CH/?format=json&page=1&limit=20"
-          show 'playlist/user no format' "https://rutube.ru/api/playlist/user/$CH/?page=1&limit=20"
-          show 'pinned_playlists' "https://rutube.ru/api/v1/channels/$CH/pinned_playlists?page=1&limit=10&order_by=created_ts_desc&limit_video=20"
-          show 'favorite playlists' "https://rutube.ru/api/metainfo/playlist/favorite?author_id=$CH&format=json"
-
-          echo -e '\n## playlist/user first item (full)' >> "$OUT"
-          get "https://rutube.ru/api/playlist/user/$CH/?format=json&page=1&limit=20" -o /tmp/u.json
-          jq -c '.results[0]' /tmp/u.json >> "$OUT" 2>/dev/null
-          echo -e '\n## pinned first item' >> "$OUT"
-          get "https://rutube.ru/api/v1/channels/$CH/pinned_playlists?page=1&limit=10&order_by=created_ts_desc&limit_video=20" -o /tmp/pin.json
-          jq -c '.results[0]' /tmp/pin.json >> "$OUT" 2>/dev/null
-
-          PID=$(jq -r '.results[0].id // empty' /tmp/u.json)
-          echo -e "\n## playlist id -> $PID" >> "$OUT"
-          if [ -n "$PID" ]; then
-            show 'playlist info' "https://rutube.ru/api/playlist/custom/$PID/?format=json"
-            show 'playlist videos' "https://rutube.ru/api/playlist/custom/$PID/videos/?page=1&limit=20&format=json"
-            echo -e '\n## playlist videos first item keys' >> "$OUT"
-            get "https://rutube.ru/api/playlist/custom/$PID/videos/?page=1&limit=20&format=json" -o /tmp/pv.json
-            jq -c '{count,n:(.results|length?),keys:(.results[0]|keys)}' /tmp/pv.json >> "$OUT"
-          fi
+          for u in "https://rutube.ru/" "https://rutube.ru/video/5f2b73ea71eb50d45e280e3fa5a31572/" "https://rutube.ru/api/video/5f2b73ea71eb50d45e280e3fa5a31572/?format=json"; do
+            printf '\n## %s\n' "$u" >> "$OUT"
+            curl -sS -D /tmp/h -o /dev/null -A "$UA" --max-time 25 "$u"
+            grep -i '^set-cookie' /tmp/h | sed -E 's/^[Ss]et-[Cc]ookie: *([^=]+)=.*/\1/' | sort -u >> "$OUT"
+          done
+          echo -e '\n## auth-ish endpoints (anon)' >> "$OUT"
+          for u in "https://rutube.ru/api/auth/whoami/?format=json" "https://rutube.ru/api/profile/current/?format=json" "https://rutube.ru/api/v3/auth/check/?format=json"; do
+            printf '%s -> %s\n' "$u" "$(curl -sS -o /tmp/b -w '%{http_code}' -A "$UA" --max-time 20 "$u") $(head -c 120 /tmp/b)" >> "$OUT"
+          done
 
       - name: Commit results
         if: always()
