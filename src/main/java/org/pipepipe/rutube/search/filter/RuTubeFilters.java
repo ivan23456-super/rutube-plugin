@@ -27,6 +27,8 @@ import org.schabi.newpipe.extractor.search.filter.SearchFiltersBase;
  */
 public final class RuTubeFilters extends SearchFiltersBase {
 
+    /** Marker kept in sync with the filter names used by the search handler. */
+
     public static final String CONTENT_VIDEOS = "videos";
     public static final String CONTENT_CHANNELS = "channels";
     public static final String CONTENT_SHORTS = "shorts";

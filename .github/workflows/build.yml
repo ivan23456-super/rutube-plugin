@@ -54,7 +54,9 @@ jobs:
             build/repo/index.json > release/index.json
           cat release/index.json
       - name: Store the package for external signing
-        if: env.SIGNED == '0' && github.event_name == 'workflow_dispatch'
+        # Committing binaries on every source change would be noise; a manual
+        # run is requested by committing an empty REQUEST_PACKAGE file.
+        if: env.SIGNED == '0' && hashFiles('REQUEST_PACKAGE') != ''
         run: |
           set -euo pipefail
           mkdir -p ci-artifacts
