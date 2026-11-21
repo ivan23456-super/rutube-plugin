@@ -18,74 +18,74 @@ jobs:
         run: |
           set -u
           OUT=probe-results.md
-          echo "# API probe $(date -u)" > "$OUT"
+          echo "# probe $(date -u)" > "$OUT"
           UA='Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36'
           q='%D0%BA%D0%BE%D1%82'
           P='https://rutube.ru/pangolin/api/web/v1/search/combined/video_playlist'
-          A='https://rutube.ru/api/search/video'
           summarize() {
             local label="$1"; shift
             {
               printf '\n## %s\n' "$label"
               code=$(curl -sS -L --max-time 25 -A "$UA" -o /tmp/body.json -w '%{http_code}' "$@")
-              printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/body.json)"
-              jq -c '{n:(.results|length?), count, keys:keys}' /tmp/body.json 2>/dev/null || head -c 200 /tmp/body.json
-              jq -c '[.results[]? | {t:(.content_type//""), ti:((.title//"")|.[0:28]), d:(.duration//0), live:(.is_livestream//false)}][:4]' /tmp/body.json 2>/dev/null || true
+              printf 'http=%s n=' "$code"
+              jq -r '(.results|length?)|tostring' /tmp/body.json 2>/dev/null || echo '?'
+              jq -c '[.results[]? | {t:(.content_type//""), ti:((.title//"")|.[0:24])}][:3]' /tmp/body.json 2>/dev/null || true
             } >> "$OUT"
           }
-          summarize 'pangolin base'                "$P?query=$q&page=1"
-          summarize 'pangolin client=wdp'          "$P?query=$q&page=1&per_page=20&client=wdp"
-          summarize 'pangolin created=day'         "$P?query=$q&page=1&created=day"
-          summarize 'pangolin created=week'        "$P?query=$q&page=1&created=week"
-          summarize 'pangolin duration=short'      "$P?query=$q&page=1&duration=short"
-          summarize 'pangolin duration=medium'     "$P?query=$q&page=1&duration=medium"
-          summarize 'pangolin duration=long'       "$P?query=$q&page=1&duration=long"
-          summarize 'pangolin order created_down'  "$P?query=$q&page=1&order_by=created_ts_down"
-          summarize 'pangolin order hits'          "$P?query=$q&page=1&order_by=hits"
-          summarize 'pangolin day+short+down'      "$P?query=$q&page=1&client=wdp&created=day&duration=short&order_by=created_ts_down"
-          summarize 'pangolin content=playlist'    "$P?query=$q&page=1&content_type=playlist"
-          summarize 'pangolin content=video'       "$P?query=$q&page=1&content_type=video"
-          summarize 'old base'                     "$A?query=$q&limit=5"
-          summarize 'old created=day'              "$A?query=$q&limit=5&created=day"
-          summarize 'old duration=short'           "$A?query=$q&limit=5&duration=short"
-          summarize 'old order created_down'       "$A?query=$q&limit=5&order_by=created_ts_down"
-          summarize 'old order hits'               "$A?query=$q&limit=5&order_by=hits"
-          summarize 'old playlist'                 "https://rutube.ru/api/search/playlist?query=$q&limit=5"
-          summarize 'channels cards'               "https://rutube.ru/api/search/combined/cards/list?query=$q&page=1&fields=video_count,is_official&content_type=channel"
-          summarize 'shorts'                       "https://rutube.ru/api/search/shorts?query=$q&page=1&per_page=20"
+          summarize 'pang base'                 "$P?query=$q&page=1"
+          summarize 'pang created=all-time'     "$P?query=$q&page=1&created=all-time"
+          summarize 'pang created=day'          "$P?query=$q&page=1&created=day"
+          summarize 'pang duration=any'         "$P?query=$q&page=1&duration=any"
+          summarize 'pang duration=movie'       "$P?query=$q&page=1&duration=movie"
+          summarize 'pang created=year'         "$P?query=$q&page=1&created=year"
+          summarize 'pang default-mix (all-time+any)' "$P?query=$q&page=1&created=all-time&duration=any"
+          summarize 'pang sort=created'         "$P?query=$q&page=1&sort=created"
+          summarize 'pang sort=hits'            "$P?query=$q&page=1&sort=hits"
+          summarize 'old /api/search/video/ base'      "https://rutube.ru/api/search/video/?query=$q&limit=5"
+          summarize 'old / created=week'        "https://rutube.ru/api/search/video/?query=$q&limit=5&created=week"
+          summarize 'old / duration=short'      "https://rutube.ru/api/search/video/?query=$q&limit=5&duration=short"
+          summarize 'old / sort=hits'           "https://rutube.ru/api/search/video/?query=$q&limit=5&sort=hits"
+          summarize 'old / sort=created'        "https://rutube.ru/api/search/video/?query=$q&limit=5&sort=created"
+          summarize 'old playlist /'            "https://rutube.ru/api/search/playlist/?query=$q&limit=5"
+          summarize 'old channel /'             "https://rutube.ru/api/search/channel/?query=$q&limit=5"
+          summarize 'cards playlist'            "https://rutube.ru/api/search/combined/cards/list?query=$q&page=1&content_type=playlist"
+          summarize 'shorts default-mix'        "https://rutube.ru/api/search/shorts?query=$q&page=1&created=all-time&duration=any"
+          summarize 'shorts created=day'        "https://rutube.ru/api/search/shorts?query=$q&page=1&created=day"
 
-          probe() {
-            local label="$1"; local id="$2"; shift 2
+          opts() {
+            local label="$1"; local id="$2"; local qs="$3"; shift 3
             {
-              printf '\n## options %s (%s)\n' "$label" "$id"
-              code=$(curl -sS -L --max-time 25 -A "$UA" -o /tmp/o.json -w '%{http_code}' "$@" "https://rutube.ru/api/play/options/$id/?format=json")
+              printf '\n## options %s id=%s qs=%s\n' "$label" "$id" "$qs"
+              code=$(curl -sS -L --max-time 25 -A "$UA" -o /tmp/o.json -w '%{http_code}' "$@" "https://rutube.ru/api/play/options/$id/?$qs")
               printf 'http=%s bytes=%s\n' "$code" "$(wc -c </tmp/o.json)"
-              jq -c '{keys:keys, detail:(.detail.type?//null), balancer:(.video_balancer|tostring|.[0:120]), live:(.live_streams|tostring|.[0:150])}' /tmp/o.json 2>/dev/null || head -c 200 /tmp/o.json
+              jq -c '{keys:keys, detail:(.detail.type?//null), balancer:(.video_balancer|tostring|.[0:100]), live:(.live_streams|tostring|.[0:220])}' /tmp/o.json 2>/dev/null || head -c 200 /tmp/o.json
             } >> "$OUT"
           }
-          id=546602986e6a424d74d594876ddb3f04
-          probe 'plain'                 "$id"
-          probe 'referer'               "$id" -H 'Referer: https://rutube.ru/'
-          probe 'xff-local'             "$id" -H 'X-Forwarded-For: 127.0.0.1'
-          probe 'referer+xff'           "$id" -H 'Referer: https://rutube.ru/' -H 'X-Forwarded-For: 127.0.0.1'
-          probe 'xhr'                   "$id" -H 'Origin: https://rutube.ru' -H 'Referer: https://rutube.ru/video/' -H 'X-Requested-With: XMLHttpRequest'
+          LIVE=546602986e6a424d74d594876ddb3f04
+          opts 'tnt plain'        "$LIVE" 'format=json'
+          opts 'tnt rutubedl qs'  "$LIVE" 'no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json'
+          opts 'tnt dbl-enc qs'   "$LIVE" 'no_404=true&referer=https%253A%252F%252Frutube.ru&pver=v2&format=json'
+          opts 'tnt qs+hdr'       "$LIVE" 'no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json' -H 'Referer: https://rutube.ru/'
+          opts 'tnt qs+xff'       "$LIVE" 'no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json' -H 'X-Forwarded-For: 127.0.0.1'
 
-          for u in "https://rutube.ru/video/546602986e6a424d74d594876ddb3f04/" "https://rutube.ru/play/embed/546602986e6a424d74d594876ddb3f04"; do
-            {
-              printf '\n## page %s\n' "$u"
-              curl -sS -L --max-time 25 -A "$UA" -o /tmp/page.html -w 'http=%{http_code} bytes=%{size_download}\n' "$u"
-              printf 'm3u8: '; grep -o 'm3u8[^"\\]\{0,60\}' /tmp/page.html | head -3 | tr '\n' ' '; echo
-              printf 'balancer: '; grep -o 'video_balancer[^,]\{0,120\}' /tmp/page.html | head -2 | tr '\n' ' '; echo
-              printf 'live: '; grep -o 'live_streams[^,]\{0,120\}' /tmp/page.html | head -2 | tr '\n' ' '; echo
-              printf 'blocking: '; grep -o 'blocking_rule[^,]\{0,60\}' /tmp/page.html | head -2 | tr '\n' ' '; echo
-            } >> "$OUT"
+          echo >> "$OUT"
+          echo '## live ids from pangolin created=day' >> "$OUT"
+          curl -sS -L --max-time 25 -A "$UA" "$P?query=$q&page=1&created=day" | jq -r '[.results[]|select(.is_livestream==true)|.id][:3]|join(" ")' >> "$OUT"
+          ids=$(curl -sS -L --max-time 25 -A "$UA" "$P?query=$q&page=1&created=day" | jq -r '[.results[]|select(.is_livestream==true)|.id][:3]|join(" ")')
+          for id in $ids; do
+            opts 'live-feed plain' "$id" 'format=json'
+            opts 'live-feed qs'    "$id" 'no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json'
           done
 
-      - name: Commit results to the branch
+          VOD=$(curl -sS -L --max-time 25 -A "$UA" "$P?query=$q&page=1" | jq -r '[.results[]|select(.content_type=="video")|.id][0]')
+          opts 'vod plain' "$VOD" 'format=json'
+          opts 'vod qs'    "$VOD" 'no_404=true&referer=https%3A%2F%2Frutube.ru&pver=v2&format=json'
+
+      - name: Commit results
         run: |
-          git config user.name "probe-bot"
-          git config user.email "probe-bot@users.noreply.github.com"
+          git config user.name probe-bot
+          git config user.email probe-bot@users.noreply.github.com
           git add probe-results.md
-          git commit -m "probe: API results"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git commit -m "probe: round 2"
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}"
