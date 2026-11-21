@@ -5,15 +5,15 @@
     {
       "pluginId": "org.pipepipe.rutube",
       "name": "RuTube",
-      "versionCode": 2,
-      "versionName": "1.0.1",
+      "versionCode": 3,
+      "versionName": "1.0.2",
       "apiVersion": "1.0",
       "author": "ivan23456-super",
-      "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-2.ppp",
-      "sha256": "96210d119a1c9031283eb5b3792e5c45ebd8f1a23cb53bc435fabc294dfa685a",
-      "signature": "iNzRLo0ZEkLQDgdUN4RwXo0Mo1zPvDhK32UdYMD2fjlp2WZahNKQw3CyLzSDd6iImH+WGkectH9fFQw88rXFDw==",
+      "package": "https://raw.githubusercontent.com/ivan23456-super/rutube-plugin/main/release/rutube-3.ppp",
+      "sha256": "9bf9ecf2de0ce9eae7c22f6157aac8368e69f6b339affa80b408a281607b8113",
+      "signature": "N3CXSC2OdO1YNIB3QzIPP3ovleH367mS5MNvz8J+qjq/6KwY7dzN6Cp/4iQGoT0y0CYHk8dYnxvniZ+3Anq1Cw==",
       "publicKey": "DLCC7suGGj0xX5WwB/zTTjCFs+3JJV8jWaBWGKb52es=",
-      "description": "RuTube video hosting: videos, live streams, Shorts, channels, playlists, search and comments.",
+      "description": "RuTube video hosting: videos, live streams, Shorts, channels with videos/Shorts/live/playlists sections, playlists, search and comments.",
       "nsfw": false
     }
   ]
